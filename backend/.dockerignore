@@ -1,0 +1,20 @@
+# virtual env
+.venv/
+venv/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# env files
+.env
+
+# IDE / VCS
+.idea/
+.vscode/
+.git
+.gitignore
+
+# entrypoint.sh
+!entrypoint.sh
