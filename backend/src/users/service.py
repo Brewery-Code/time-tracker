@@ -1,25 +1,17 @@
-from datetime import timedelta
+import logging
 
-from fastapi import HTTPException, Response
-from sqlalchemy.exc import NoResultFound
+from authx import TokenPayload
+from fastapi import HTTPException, Response, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from authx import AuthX, AuthXConfig, RequestToken
-from sqlalchemy import select, and_
+from sqlalchemy import select
 
 from src.users.models import User
 from src.users.schemas import UserCreateSchema, UserLoginSchema
 from src.users.utils import hash_password, verify_password
+from src.users.config import auth
 
 
-config = AuthXConfig(
-    JWT_ALGORITHM="HS256",
-    JWT_SECRET_KEY="secret_key",
-    JWT_TOKEN_LOCATION=["cookies"],
-    JWT_ACCESS_TOKEN_EXPIRES=timedelta(minutes=5),
-    JWT_REFRESH_TOKEN_EXPIRES=timedelta(days=5),
-)
-
-auth = AuthX(config=config)
+logger = logging.getLogger(__name__)
 
 
 class UserService:
@@ -49,23 +41,27 @@ class UserService:
 
         access_token = auth.create_access_token(uid=str(db_user.id))
         refresh_token = auth.create_refresh_token(uid=str(db_user.id))
+        auth.set_access_cookies(access_token, response)
+        auth.set_refresh_cookies(refresh_token, response)
 
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=False,
-            secure=False,
-            samesite="Lax",
-            max_age=300,
-        )
-
-        response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="Lax",
-            max_age=432_000,
-        )
         return {"message": "Login successful."}
+
+
+    @staticmethod
+    async def get_new_access_token(payload: TokenPayload, response: Response, session: AsyncSession):
+        uid = payload.sub
+
+        query = select(User).where(User.id == int(uid))
+        result = await session.execute(query)
+        user = result.scalar_one_or_none()
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+
+        new_access_token = auth.create_access_token(uid=str(user.id))
+        new_refresh_token = auth.create_refresh_token(uid=str(user.id))
+
+        auth.set_access_cookies(new_access_token, response)
+        auth.set_refresh_cookies(new_refresh_token, response)
+
+        return {"message": "Access token refreshed."}
 
