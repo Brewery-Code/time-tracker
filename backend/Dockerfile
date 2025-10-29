@@ -5,7 +5,7 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-RUN apt update && apt install -y --no-install-recommends curl
+RUN apt update && apt install -y --no-install-recommends curl gcc build-essential libpq-dev
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 

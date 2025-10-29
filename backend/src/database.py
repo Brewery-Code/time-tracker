@@ -5,7 +5,7 @@ from sqlalchemy.orm import DeclarativeBase
 from decouple import config
 
 
-DB_URL = f"postgresql://{config('POSTGRES_USER')}:{config('POSTGRES_PASSWORD')}@{config('POSTGRES_HOST')}:5432/{config('POSTGRES_DB')}"
+DB_URL = f"postgresql+asyncpg://{config('POSTGRES_USER')}:{config('POSTGRES_PASSWORD')}@{config('POSTGRES_HOST')}:5432/{config('POSTGRES_DB')}"
 
 engine = create_async_engine(DB_URL)
 new_session = async_sessionmaker(engine, expire_on_commit=False)
