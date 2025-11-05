@@ -3,12 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastadmin import fastapi_app as admin_app
 
 from src.users.router import router as user_router
-from src.admin.users import UserAdmin
-
+from src.employee.router import router as employee_router
+import src.admin
 
 app = FastAPI()
 app.mount("/admin", admin_app)
 app.include_router(user_router)
+app.include_router(employee_router)
 
 
 # CORS Middleware
