@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastadmin import fastapi_app as admin_app
 
+from src.database import new_session
 from src.users.router import router as user_router
-from src.admin.users import UserAdmin
-
+import src.admin
 
 app = FastAPI()
 app.mount("/admin", admin_app)

@@ -56,7 +56,7 @@ class Employee(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
     workplace_id: Mapped[int] = mapped_column(ForeignKey('workplaces.id', ondelete='RESTRICT'), nullable=False)
-    workplaces: Mapped["WorkPlace"] = relationship(back_populates="employees")
+    workplace: Mapped["WorkPlace"] = relationship(back_populates="employees")
 
     def __str__(self):
         return self.full_name
