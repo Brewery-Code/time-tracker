@@ -2,7 +2,7 @@ from authx import TokenPayload
 from fastapi import APIRouter, Response, Depends, Request
 
 from src.dependencies import SessionDep
-from src.users.schemas import UserCreateSchema, UserLoginSchema
+from src.users.schemas import UserCreateSchema, UserLoginSchema, UserCurrentSchema
 from src.users.service import UserService, auth
 
 
@@ -29,3 +29,9 @@ async def token_refresh(response: Response, session: SessionDep, payload: TokenP
     Requires refresh token cookie.
     """
     return await UserService.get_new_access_token(payload, response, session)
+
+
+@router.get("/me", summary="Get current user's info", response_model=UserCurrentSchema)
+async def get_current_user(session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
+    """Get current user's info."""
+    return await UserService.get_user_profile(payload, session)
