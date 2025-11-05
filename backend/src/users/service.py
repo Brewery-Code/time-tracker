@@ -108,3 +108,20 @@ class UserService:
 
         return user
 
+
+    @staticmethod
+    async def deactivate_user(payload: TokenPayload, session: AsyncSession)-> dict:
+        """
+        Deactivate a user's account.
+
+        Args:
+            payload (TokenPayload): JWT token payload.
+            session (AsyncSession): DB session.
+        """
+        uid = extract_user_uid_from_token(payload)
+        user = await extract_user_by_id(uid, User, session)
+
+        user.is_active = False
+        await session.commit()
+        return {"status_code": 200, "message": "User account deactivated"}
+
