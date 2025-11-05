@@ -15,9 +15,19 @@ logger = logging.getLogger(__name__)
 
 
 class UserService:
+    """
+    Provides business logic for managing users accounts.
+    """
+
     @staticmethod
     async def create_user(user: UserCreateSchema, session: AsyncSession):
-        """Create new user."""
+        """
+        Create a new user entry in the DB.
+
+        Args:
+            user (UserCreateSchema): Validated input data.
+            session (AsyncSession): DB session.
+        """
         hashed_password = hash_password(user.password)
         new_user = User(full_name=user.full_name, email=user.email, password=hashed_password)
         session.add(new_user)
@@ -29,7 +39,14 @@ class UserService:
 
     @staticmethod
     async def login_user(user: UserLoginSchema, response: Response, session: AsyncSession):
-        """Login user."""
+        """
+        Login an existing user entry in the DB.
+
+        Args:
+            user (UserLoginSchema): Validated input data.
+            session (AsyncSession): DB session.
+            response (Response): Response object.
+        """
         logger.info(f"Login request for user {user.email}")
         query = select(User).where(User.email == user.email)
         result = await session.execute(query)
@@ -54,7 +71,14 @@ class UserService:
 
     @staticmethod
     async def get_new_access_token(payload: TokenPayload, response: Response, session: AsyncSession):
-        """Create new access token."""
+        """
+        Update an JWT token for an existing user entry in the DB.
+
+        Args:
+            payload (TokenPayload): JWT token payload.
+            session (AsyncSession): DB session.
+            response (Response): Response object.
+        """
         logger.info(f"Requesting new access token for user {payload.sub}")
         uid = payload.sub
 

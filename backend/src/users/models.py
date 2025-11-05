@@ -8,7 +8,15 @@ from src.database import Base
 
 class User(Base):
     """
-    User model
+    Represents a single user entity in the DB.
+
+    Attributes:
+        id (int): Unique Identifier.
+        full_name (str): Full name of the user.
+        email (str): User email address.
+        password (str): Hashed password.
+        created_at (datetime): When the user was created.
+        updated_at (datetime): When the user was last updated.
     """
     __tablename__ = 'users'
 
