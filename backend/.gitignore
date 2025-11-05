@@ -4,3 +4,6 @@ venv/
 
 # other
 .env
+
+# Jetbrains
+.idea
