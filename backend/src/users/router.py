@@ -23,9 +23,11 @@ async def login_user(user: UserLoginSchema, response: Response, session: Session
 
 @router.post("/token-refresh")
 async def token_refresh(response: Response, session: SessionDep, payload: TokenPayload = Depends(auth.refresh_token_required)):
+    """Refresh a access token"""
     return await UserService.get_new_access_token(payload, response, session)
 
 
 @router.get("/protected", dependencies=[Depends(auth.access_token_required)])
 async def protected():
+    """test endpoint"""
     return {"message": "Welcome"}

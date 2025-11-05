@@ -3,6 +3,7 @@ from datetime import timedelta
 from authx import AuthX, AuthXConfig
 
 
+# JWT auth config
 config = AuthXConfig(
     JWT_ALGORITHM="HS256",
     JWT_SECRET_KEY="secret_key",
@@ -10,5 +11,4 @@ config = AuthXConfig(
     JWT_ACCESS_TOKEN_EXPIRES=timedelta(minutes=5),
     JWT_REFRESH_TOKEN_EXPIRES=timedelta(days=5),
 )
-
 auth = AuthX(config=config)

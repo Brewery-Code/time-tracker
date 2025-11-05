@@ -23,38 +23,46 @@ class UserService:
         session.add(new_user)
         await session.commit()
         await session.refresh(new_user)
-        return {"message": f"User with email={new_user.email} was created."}
+        logger.info(f"User with email {new_user.email} created. His ID is {new_user.id}.")
+        return {"status_code": 201, "message": "User created successfully."}
 
 
     @staticmethod
-    async def login_user(user: UserLoginSchema, response: Response  ,session: AsyncSession):
+    async def login_user(user: UserLoginSchema, response: Response, session: AsyncSession):
         """Login user."""
+        logger.info(f"Login request for user {user.email}")
         query = select(User).where(User.email == user.email)
         result = await session.execute(query)
         db_user = result.scalar_one_or_none()
 
         if not db_user:
+            logger.warning(f"Login failed. User with email={user.email} was not found.")
             raise HTTPException(status_code=401, detail="User not found")
 
         if not verify_password(user.password, db_user.password):
+            logger.warning(f"Login failed. User with email={user.email} enter wrong password.")
             raise HTTPException(status_code=401, detail="Incorrect password")
 
         access_token = auth.create_access_token(uid=str(db_user.id))
         refresh_token = auth.create_refresh_token(uid=str(db_user.id))
         auth.set_access_cookies(access_token, response)
         auth.set_refresh_cookies(refresh_token, response)
+        logger.info(f"User with email={user.email} logged in successfully.")
 
-        return {"message": "Login successful."}
+        return {"status_code": 200, "message": "Login successful."}
 
 
     @staticmethod
     async def get_new_access_token(payload: TokenPayload, response: Response, session: AsyncSession):
+        """Create new access token."""
+        logger.info(f"Requesting new access token for user {payload.sub}")
         uid = payload.sub
 
         query = select(User).where(User.id == int(uid))
         result = await session.execute(query)
         user = result.scalar_one_or_none()
         if not user:
+            logger.warning(f"Generating new access token for user {payload.sub} failed. User with ID={uid} was not found.")
             raise HTTPException(status_code=401, detail="User not found")
 
         new_access_token = auth.create_access_token(uid=str(user.id))
@@ -62,6 +70,6 @@ class UserService:
 
         auth.set_access_cookies(new_access_token, response)
         auth.set_refresh_cookies(new_refresh_token, response)
-
-        return {"message": "Access token refreshed."}
+        logger.info(f"Access token for user {user.id} was successfully refreshed.")
+        return {"status_code": 200, "message": "Access token refreshed."}
 

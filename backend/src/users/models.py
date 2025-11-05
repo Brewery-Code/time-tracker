@@ -7,6 +7,9 @@ from src.database import Base
 
 
 class User(Base):
+    """
+    User model
+    """
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True)
