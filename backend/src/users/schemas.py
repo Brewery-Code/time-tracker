@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -16,3 +18,14 @@ class UserLoginSchema(BaseModel):
     """
     email: EmailStr
     password: str = Field(min_length=8, max_length=70)
+
+
+class UserCurrentSchema(BaseModel):
+    """
+    Schema used for current user return.
+    """
+    id: int
+    full_name: str
+    email: EmailStr
+    created_at: datetime
+
