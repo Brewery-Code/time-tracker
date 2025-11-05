@@ -20,4 +20,4 @@ def verify_personal_token(plain_personal_token: str, hashed_personal_token: str)
 def generate_personal_token(uid: int) -> str:
     """Return random personal token"""
     chars = string.ascii_letters + string.digits
-    return ''.join(random.choice(chars) for _ in range(10)) + str(uid) + ''.join(random.choice(chars) for _ in range(10))
+    return ''.join(random.choice(chars) for _ in range(20)) + str(uid) + ''.join(random.choice(chars) for _ in range(20))

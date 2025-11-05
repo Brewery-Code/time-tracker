@@ -9,11 +9,20 @@ from src.employee.models import Employee
 
 
 class EmployeeService:
-    """"""
+    """
+    Provides business logic for managing employee accounts
+    """
 
     @staticmethod
     async def create_employee(data: EmployeeCreateSchema, payload: TokenPayload, session: SessionDep):
-        """"""
+        """
+        Create a new employee entry in the DB.
+
+        Args:
+            data (EmployeeCreateSchema): Validated data.
+            payload (TokenPayload): Validated payload.
+            session (Session): Session object.
+        """
         uid = extract_user_uid_from_token(payload)
         user = await extract_user_by_id(uid, User, session)
 
