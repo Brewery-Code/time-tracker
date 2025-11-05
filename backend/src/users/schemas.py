@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 class UserCreateSchema(BaseModel):
     """
-    User creation schema
+    Schema used when creating a new user.
     """
     full_name: str = Field(max_length=100)
     email: EmailStr
@@ -12,7 +12,7 @@ class UserCreateSchema(BaseModel):
 
 class UserLoginSchema(BaseModel):
     """
-    User login schema
+    Schema used when user trying to log-in
     """
     email: EmailStr
     password: str = Field(min_length=8, max_length=70)
