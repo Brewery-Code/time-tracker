@@ -35,3 +35,9 @@ async def token_refresh(response: Response, session: SessionDep, payload: TokenP
 async def get_current_user(session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
     """Get current user's info."""
     return await UserService.get_user_profile(payload, session)
+
+
+@router.delete("/me", summary="Deactivate a user's profile")
+async def deactivate_user(session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
+    """Deactivate a user's profile."""
+    return await UserService.deactivate_user(payload, session)
