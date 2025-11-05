@@ -51,11 +51,13 @@ class Employee(Base):
     email: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     phone_number: Mapped[str] = mapped_column(String(13), nullable=False, unique=True)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+    personal_token: Mapped[str] = mapped_column(String(255), nullable=True, unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True, default=func.now(), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True, onupdate=func.now(), server_default=func.now())
 
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
     workplace_id: Mapped[int] = mapped_column(ForeignKey('workplaces.id', ondelete='RESTRICT'), nullable=False)
+    user: Mapped[User] = relationship("User", lazy="joined")
     workplace: Mapped["WorkPlace"] = relationship(back_populates="employees")
 
     def __str__(self):
