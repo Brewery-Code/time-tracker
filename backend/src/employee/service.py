@@ -1,7 +1,9 @@
 from authx import TokenPayload
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from src.dependencies import SessionDep
-from src.employee.schemas import EmployeeCreateSchema
+from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema
 from src.employee.utils import generate_personal_token, hash_personal_token
 from src.utils.users import extract_user_uid_from_token, extract_user_by_id
 from src.users.models import User
@@ -43,3 +45,20 @@ class EmployeeService:
 
         return {"msg": "success", "personal_token": personal_token}
 
+
+    @staticmethod
+    async def get_all_employees(session: SessionDep, payload: TokenPayload):
+        """
+        Get all workers for current user.
+
+        Args:
+            session (AsyncSession): Session object.
+            payload (TokenPayload): Validated payload.
+        """
+        user_id = extract_user_uid_from_token(payload)
+
+        query = select(Employee).where(Employee.user_id == user_id).options(selectinload(Employee.workplace))
+        result = await session.execute(query)
+        employees = result.scalars().all()
+
+        return [EmployeeReturnSchema.model_validate(e) for e in employees]
