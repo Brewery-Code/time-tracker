@@ -21,7 +21,7 @@ async def login_user(user: UserLoginSchema, response: Response, session: Session
     return await UserService.login_user(user, response, session)
 
 
-@router.post("/token-refresh")
+@router.post("/token-refresh", openapi_extra={"security": [{"JWT Refresh Cookie": []}]})
 async def token_refresh(response: Response, session: SessionDep, payload: TokenPayload = Depends(auth.refresh_token_required)):
     """
     Return Updated JWT tokens in cookies.
@@ -31,13 +31,13 @@ async def token_refresh(response: Response, session: SessionDep, payload: TokenP
     return await UserService.get_new_access_token(payload, response, session)
 
 
-@router.get("/me", summary="Get current user's info", response_model=UserCurrentSchema)
+@router.get("/me", summary="Get current user's info", response_model=UserCurrentSchema, openapi_extra={"security": [{"JWT Access Cookie": []}]})
 async def get_current_user(session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
     """Get current user's info."""
     return await UserService.get_user_profile(payload, session)
 
 
-@router.delete("/me", summary="Deactivate a user's profile")
+@router.delete("/me", summary="Deactivate a user's profile", openapi_extra={"security": [{"JWT Access Cookie": []}]})
 async def deactivate_user(session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
     """Deactivate a user's profile."""
     return await UserService.deactivate_user(payload, session)
