@@ -35,6 +35,10 @@ POSTGRES_PORT=5432
 
 PGADMIN_DEFAULT_EMAIL:name@example.com
 PGADMIN_DEFAULT_PASSWORD:secret
+
+ADMIN_USER_MODEL=User
+ADMIN_USER_MODEL_USERNAME_FIELD=email
+ADMIN_SECRET_KEY=secret_key
 ```
    💡 Keep these values consistent with your docker-compose.yml setup.
 
