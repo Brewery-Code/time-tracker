@@ -5,7 +5,7 @@ from decouple import config as decouple_config
 
 from src.database import Base
 from src.users.models import User
-from src.employee.models import Employee, WorkPlace
+from src.employee.models import *
 
 # Alembic Config object
 alembic_config = context.config

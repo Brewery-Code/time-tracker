@@ -2,6 +2,7 @@ from authx import TokenPayload
 from fastapi import APIRouter, Depends
 
 from src.dependencies import SessionDep
+from src.employee.dependencies import get_current_employer_token
 from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema
 from src.employee.service import EmployeeService
 from src.users.config import auth
@@ -19,3 +20,15 @@ async def create_employee(data: EmployeeCreateSchema, session: SessionDep, paylo
 async def get_all_employees(session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
     """Get all employees for current user."""
     return await EmployeeService.get_all_employees(session, payload)
+
+
+@router.post("/work/start", summary="Start a new work session")
+async def start_work(session: SessionDep, token: str = Depends(get_current_employer_token)):
+    """Start a new work session."""
+    return await EmployeeService.start_work(session, token)
+
+
+@router.post("/work/end", summary="End a new work session")
+async def end_work(session: SessionDep, token: str = Depends(get_current_employer_token)):
+    """End a new work session."""
+    return await EmployeeService.end_work(session, token)
