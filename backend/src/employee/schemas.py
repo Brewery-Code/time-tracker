@@ -1,5 +1,6 @@
 import re
-from datetime import datetime
+from datetime import datetime, date
+from typing import List
 
 from pydantic import BaseModel, EmailStr, field_validator
 
@@ -49,3 +50,38 @@ class EmployeeReturnSchema(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+
+class WorkSummarySchema(BaseModel):
+    """
+    Schema using when returning work summary
+    """
+    date: date
+    hours: float
+
+
+class EmployeeReturnDetailSchema(BaseModel):
+    """
+    Schema using when returning employee detail information
+    """
+    id: int
+    full_name: str
+    email: EmailStr
+    phone_number: str
+    created_at: datetime
+    workplace: WorkPlaceReturnSchema
+    personal_token: str
+
+    model_config = {
+        "from_attributes": True
+    }
+
+
+class EmployeeWorkDetailSchema(BaseModel):
+    """
+    Schema using when returning employee work detail information
+    """
+    employee: EmployeeReturnDetailSchema
+    period: str
+    work_summary: List[WorkSummarySchema]
+    total_hours: float
