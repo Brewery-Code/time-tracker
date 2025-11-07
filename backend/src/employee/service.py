@@ -2,11 +2,12 @@ from datetime import date, datetime, timedelta, timezone
 
 from authx import TokenPayload
 from fastapi import HTTPException
-from sqlalchemy import select, update, func
-from sqlalchemy.orm import selectinload
+from sqlalchemy import select, update, func, extract
+from sqlalchemy.orm import selectinload, Session
 
 from src.dependencies import SessionDep
-from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema
+from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema, EmployeeWorkDetailSchema, \
+    EmployeeReturnDetailSchema, WorkSummarySchema
 from src.employee.utils import generate_personal_token, hash_personal_token
 from src.utils.users import extract_user_uid_from_token, extract_user_by_id
 from src.users.models import User
@@ -66,6 +67,67 @@ class EmployeeService:
 
         return [EmployeeReturnSchema.model_validate(e) for e in employees]
 
+
+    @staticmethod
+    async def get_employee_detail(employee_id: int, session: SessionDep, month: int | None, year: int | None, payload: TokenPayload) -> EmployeeWorkDetailSchema:
+        """
+        Get detailed info and work summary for an employee.
+
+        Args:
+            employee_id (int): Employee ID.
+            session (AsyncSession): AsyncSession object.
+            month (int, optional): Month.
+            year (int, optional): Year.
+            payload (TokenPayload): Validated payload.
+        """
+        user_id = extract_user_uid_from_token(payload)
+
+        query = (
+            select(Employee)
+            .where(Employee.id == employee_id, Employee.user_id == user_id)
+            .options(selectinload(Employee.workplace))
+        )
+        result = await session.execute(query)
+        employee = result.scalar_one_or_none()
+
+        if not employee:
+            raise HTTPException(status_code=404, detail="Employee not found or access denied")
+
+        today = date.today()
+
+        if month and year:
+            stmt = select(WorkDay).where(
+                WorkDay.employee_id == employee.id,
+                extract("month", WorkDay.work_date) == month,
+                extract("year", WorkDay.work_date) == year,
+            )
+            period_type = "month"
+        else:
+            start_week = today - timedelta(days=today.weekday())
+            end_week = start_week + timedelta(days=6)
+            stmt = select(WorkDay).where(
+                WorkDay.employee_id == employee.id,
+                WorkDay.work_date.between(start_week, end_week),
+            )
+            period_type = "week"
+
+        result = await session.execute(stmt)
+        work_days = result.scalars().all()
+
+        summaries: list[WorkSummarySchema] = []
+        total_hours = 0.0
+
+        for day in work_days:
+            hours = (day.total_duration.total_seconds() / 3600) if day.total_duration else 0
+            total_hours += hours
+            summaries.append(WorkSummarySchema(date=day.work_date, hours=round(hours, 2)))
+
+        return EmployeeWorkDetailSchema(
+            employee=EmployeeReturnDetailSchema.model_validate(employee),
+            period=period_type,
+            work_summary=summaries,
+            total_hours=round(total_hours, 2),
+        )
 
     @staticmethod
     async def start_work(session: SessionDep, token: str):
