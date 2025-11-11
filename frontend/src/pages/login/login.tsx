@@ -1,5 +1,5 @@
-function Login() {
-  return <div className="">login</div>;
+function LoginPage() {
+  return <div className="container-base">login</div>;
 }
 
-export const Component = Login;
+export const Component = LoginPage;

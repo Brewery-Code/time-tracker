@@ -1,11 +1,17 @@
 import { Outlet } from "react-router-dom";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
 
 export function App() {
   return (
-    <>
-      <div className="">Header</div>
-      <Outlet />
-      <div className="">Footer</div>
-    </>
+    <div className="relative flex flex-col min-h-svh">
+      <header className="">Header</header>
+      <main className="grow">
+        <Outlet />
+      </main>
+      <footer className="">Footer</footer>
+    </div>
   );
 }

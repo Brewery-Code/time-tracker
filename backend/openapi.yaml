@@ -1,0 +1,877 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: NNIKITI API
+  description: This is an API for the educational institution's information system.
+
+servers:
+  - url: http://127.0.0.1:8000/api/v1/
+    description: Local development
+
+tags:
+  - name: auth
+    description: Auth endpoints
+  - name: users
+    description: Users endpoints
+  - name: core
+    description: Core endpoints
+  - name: events
+    description: Events endpoints
+  - name: departments
+    description: Departments endpoints
+
+paths:
+  /core/main-slider-items/:
+    get:
+      tags:
+        - core
+      summary: Returns a list of slider images.
+      description: Returns a list of slider images
+      responses:
+        "200":
+          description: Successfully returned a list of slider images
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MainSliderItem"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /core/statistic-block/:
+    get:
+      tags:
+        - core
+      summary: Returns a list of data for the statistic block.
+      description: Returns a list of data for statistic block
+      responses:
+        "200":
+          description: Successfully returned a list of data for statictic block
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StatisticBlock"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /core/partners/:
+    get:
+      tags:
+        - core
+      summary: Returns a list of partners.
+      description: Returns a list of data for partners block
+      responses:
+        "200":
+          description: Successfully returned a list of data for partners block
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Partners"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /core/faq/:
+    get:
+      tags:
+        - core
+      summary: Returns a list of FAQs (questions and answers).
+      description: Returns a list of data for the FAQ block
+      responses:
+        "200":
+          description: Successfully returned a list of data for the FAQ block
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FAQs"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /core/educational-programs/:
+    get:
+      tags:
+        - core
+      summary: Returns a list of educational programs.
+      description: Returns a list of data for the edu-programs block.
+      responses:
+        "200":
+          description: Successfully returned a list of data for the edu-programs block
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EducationalProgram"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /core/alumni/:
+    get:
+      tags:
+        - core
+      summary: Returns a list of Alumni
+      description: Returns a list of Alumni, optionally filtered by graduation year
+      parameters:
+        - in: query
+          name: year
+          schema:
+            type: integer
+            example: 2024
+          description: Graduation year to filter alumni
+          required: false
+      responses:
+        "200":
+          description: Successfully returned a list of Alumni
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alumnus"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /core/alumni/years/:
+    get:
+      tags:
+        - core
+      summary: Returns a list of graduation years
+      description: Returns a list of graduation years
+      responses:
+        "200":
+          description: Successfully returned a list of alumni
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                  example: 2024, 2025
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /core/alumni-slider-items/:
+    get:
+      tags:
+        - core
+      summary: Returns a list of alumni slider objects.
+      description: Returns a list of alumni slider objects
+      responses:
+        "200":
+          description: Successfully returned a list of slider images
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AlumniSliderItem"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /auth/google/:
+    post:
+      tags:
+        - auth
+      summary: Login using Google OAuth2 with PKCE
+      description: >
+        1) Send JSON body with:
+           - `code` (authorization code received from Google after redirect)
+           - `code_verifier` (PKCE code verifier generated on frontend)
+        2) Backend exchanges the `code` and `code_verifier` for Google access token.
+        
+        3) User is created or updated in the local database, and app-specific access and refresh tokens are generated.
+        
+        4) **Access token is returned in the JSON response body.**
+        
+        5) **Refresh token is set as a secure HttpOnly cookie named `refresh_token`.**
+        *This endpoint does NOT require an Authorization header (no token required) since it is the login endpoint.*
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ code, code_verifier ]
+              properties:
+                code:
+                  type: string
+                  description: Authorization code received from Google (provided by frontend)
+                code_verifier:
+                  type: string
+                  description: PKCE code verifier matching the code_challenge sent initially
+      responses:
+        "200":
+          description: Successfully authenticated, tokens issued
+          headers:
+            Set-Cookie:
+              description: Refresh token is set in a HttpOnly, Secure cookie
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: OAuth2 access token to use in Authorization header
+                  expires_in:
+                    type: integer
+                    description: Access token lifetime in seconds
+                  token_type:
+                    type: string
+                    example: Bearer
+        "400":
+          description: Missing code or code_verifier, or Google token exchange error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/token/:
+    post:
+      tags:
+        - auth
+      summary: Refresh access token using refresh_token cookie
+      description: >
+        1) Send POST with body:
+           - `client_id=client_id`
+           - `grant_type=refresh_token`
+        
+        2) **Refresh token is NOT sent in the body; it is automatically read from the HttpOnly cookie `refresh_token`.**
+        
+        3) If the refresh token is valid, a new access token is returned in the response body.
+        
+        4) A new refresh token cookie is also set to replace the old one.
+        *This endpoint does NOT require an Authorization header because refresh token is taken from the cookie.*
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [ client_id ,grant_type ]
+              properties:
+                client_id:
+                  type: string
+                  enum: [client_id]
+                  description: Client token from API
+                grant_type:
+                  type: string
+                  enum: [ refresh_token ]
+                  description: Must be exactly `refresh_token`
+      responses:
+        "200":
+          description: Access token successfully refreshed
+          headers:
+            Set-Cookie:
+              description: Updated refresh token set in cookie
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: New access token
+                  expires_in:
+                    type: integer
+                    description: Access token lifetime in seconds
+                  token_type:
+                    type: string
+                    example: Bearer
+        "400":
+          description: Invalid request or missing/invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /users/me/:
+    get:
+      tags:
+        - users
+      summary: Get current authenticated user information
+      description: >
+        Returns information about the currently authenticated user.  
+        Requires a valid `access` token via Authorization header.
+      security:
+        - AccessTokenAuth: []
+      responses:
+        "200":
+          description: Successfully returned user info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized or token missing/invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error during profile fetching
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/role/:
+    get:
+      tags:
+        - users
+      summary: Get current user role
+      description: Returns information about role current user. (Required `access` token in headers for auth user)
+      responses:
+        "200":
+          description: Successfully returned information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  role:
+                    type: string
+              examples:
+                guest:
+                  summary: Guest
+                  value:
+                    id: null
+                    role: GU
+                student:
+                  summary: Student
+                  value:
+                    id: 42
+                    role: ST
+                teacher:
+                  summary: Teacher
+                  value:
+                    id: 1
+                    role: TE
+                data_operator:
+                  summary: Data Operator
+                  value:
+                    id: 4
+                    role: OP
+        "401":
+          description: Unauthorized or token missing/invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /events/:
+    get:
+      tags:
+        - events
+      summary: Returns a list of events.
+      description: Returns list of the events.
+      responses:
+        "200":
+          description: Event list successfully returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Events"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /events/{id}/:
+    get:
+      tags:
+        - events
+      summary: Returns details of a single event by its unique ID.
+      description: Returns a single event object by its unique ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the event
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Event object successfully returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Events"
+        "400":
+          description: Bad request (invalid ID or malformed request)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+        "404":
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /departments/:
+    get:
+      tags:
+        - departments
+      summary: Returns a list of departments
+      description: Returns a list of departments
+      responses:
+        "200":
+          description: Departments list successfully returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Departments"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /departments/{id}/:
+    get:
+      tags:
+        - departments
+      summary: Returns details of a single department by its unique ID.
+      description: Returns a single department object by its unique ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the event
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Department object successfully returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepartmentDetail"
+        "400":
+          description: Bad request (invalid ID or malformed request)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+        "404":
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+components:
+  securitySchemes:
+    AccessTokenAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human readable error message
+      required:
+        - code
+        - message
+
+    MainSliderItem:
+      type: object
+      properties:
+        id:
+          title: ID
+          type: integer
+          readOnly: true
+        image:
+          title: Image
+          type: string
+          format: uri
+          readOnly: true
+    StatisticBlock:
+      type: object
+      properties:
+        id:
+          title: ID
+          type: integer
+          readOnly: true
+        title:
+          title: Title
+          type: string
+          readOnly: True
+        description:
+          title: Description
+          type: string
+          readOnly: True
+        start_value:
+          title: Start Value
+          type: integer
+          readOnly: True
+        order:
+          title: Order
+          type: integer
+          readOnly: True
+    User:
+      type: object
+      properties:
+        id:
+          title: ID
+          type: integer
+          readOnly: true
+        first_name:
+          title: First name
+          type: string
+          readOnly: true
+        last_name:
+          title: Last name
+          type: string
+          readOnly: true
+        email:
+          title: Email
+          type: string
+          format: email
+          readOnly: true
+        avatar:
+          title: Avatar
+          type: string
+          format: uri
+          readOnly: true
+    Events:
+      type: object
+      properties:
+        id:
+          title: ID
+          type: integer
+          readOnly: true
+        title:
+          title: Title
+          type: string
+          readOnly: true
+        body:
+          title: Body
+          type: string
+          readOnly: true
+        body_html:
+          title: HTML Body
+          type: string
+          readOnly: true
+        category:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            rgb_color:
+              type: string
+              example: "(244,255,244,0.1)"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-06-30T11:39:01.957067Z"
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-06-30T12:10:46.028492Z"
+          readOnly: true
+    Partners:
+      type: object
+      properties:
+        id:
+          title: ID
+          type: integer
+          readOnly: true
+        name:
+          title: Name
+          type: string
+          readOnly: true
+        image:
+          title: Image
+          type: string
+          format: uri
+          readOnly: true
+        site_url:
+          title: Site url
+          type: string
+          format: uri
+          readOnly: true
+    FAQs:
+      type: object
+      properties:
+        id:
+          title: ID
+          type: integer
+          readOnly: true
+        question:
+          title: Question
+          type: string
+          readOnly: true
+        answer:
+          title: Question
+          type: string
+          readOnly: true
+    CategorizedTag:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+    EducationalProgram:
+      type: object
+      properties:
+        id:
+          type: integer
+          title: ID
+          readOnly: true
+        code:
+          type: string
+          title: Program code
+        name:
+          type: string
+          title: Educational program name
+        subject:
+          type: array
+          title: Subjects
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/CategorizedTag'
+        education_forms:
+          type: array
+          title: Education Forms
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/CategorizedTag'
+        education_levels:
+          type: array
+          title: Education Levels
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/CategorizedTag'
+    EducationalProgramFull:
+      allOf:
+        - $ref: '#/components/schemas/EducationalProgram'
+        - type: object
+          properties:
+            description:
+              type: string
+            bachelor:
+              type: object
+              nullable: true
+              properties:
+                code:
+                  type: string
+                specialty:
+                  type: string
+                program:
+                  type: string
+            magistracy:
+              type: object
+              nullable: true
+              properties:
+                code:
+                  type: string
+                specialty:
+                  type: string
+                program:
+                  type: string
+            postgraduate:
+              type: object
+              nullable: true
+              properties:
+                code:
+                  type: string
+                specialty:
+                  type: string
+                program:
+                  type: string
+    Departments:
+      type: object
+      properties:
+        id:
+          type: integer
+          title : ID
+          readOnly: true
+        name:
+          type: string
+          title: Department name
+    DepartmentDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          title: ID
+          readOnly: true
+        name:
+          type: string
+          title: Department name
+          description: Translated name of the department
+        description:
+          type: string
+          title: Department description
+          description: Translated description of the department
+        address:
+          type: string
+          title: Department address
+          description: Translated address of the department
+        email:
+          type: string
+          format: email
+          title: Email address
+        head_of_department:
+          type: array
+          title: Head(s) of Department
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                title: ID
+              regalia:
+                type: string
+                title: Regalia
+                description: Translated regalia/title of the head
+              full_name:
+                type: string
+                title: Full name
+                description: Translated full name
+              email:
+                type: string
+                format: email
+                title: Email
+              audience:
+                type: string
+                title: Audience
+        educational_program:
+          type: array
+          title: Educational Programs
+          items:
+            $ref: '#/components/schemas/EducationalProgramFull'
+    Alumnus:
+      type: object
+      properties:
+        id:
+          type: integer
+          title: ID
+          readOnly: true
+        full_name:
+          type: string
+          title: Full name
+          readOnly: true
+        text:
+          type: string
+          title: About student
+          readOnly: true
+        image:
+          type: string
+          format: uri
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          title: Created at
+          readOnly: true
+        date_of_graduation:
+          type: string
+          format: date
+          title: Date of graduation
+          readOnly: true
+        links:
+          type: object
+          title: Social links or publications
+          description: Dictionary of social/profile links
+          additionalProperties:
+            type: string
+            format: uri
+          example:
+            instagram: "https://instagram.com/example"
+            telegram: "https://t.me/example"
+            facebook: "https://facebook.com/example"
+        major:
+          type: string
+          readOnly: true
+        degree:
+          type: string
+          readOnly: true
+        workplace:
+          type: string
+          readOnly: true
+        position:
+          type: string
+          readOnly: true
+    AlumniSliderItem:
+      type: object
+      properties:
+        id:
+          title: ID
+          type: integer
+          readOnly: true
+        image:
+          title: Image
+          type: string
+          format: uri
+          readOnly: true
+

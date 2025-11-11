@@ -1,4 +1,6 @@
-.env.development
+# Ignore artifacts:
+build
+coverage
 
 # Logs
 logs

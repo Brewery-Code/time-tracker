@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+body {
+  color: #fff;
+  line-height: 100%;
+  background-color: #0f1214;
+}
+
+.container-base {
+  position: relative;
+  left: calc((100vw - 100%) / 2);
+  max-width: 1564px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+@media (max-width: 1024px) {
+  .container-base {
+    position: static;
+    left: auto;
+  }
+}
