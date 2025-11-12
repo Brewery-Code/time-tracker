@@ -56,10 +56,10 @@ Build and start all services:
 - Admin Panel → http://localhost:8000/admin
 
 ## 💾 4. Load Database Dump
-1. Access the Postgres container:
-   ```docker exec -it postgres_container bash```
-2. Import the dump:
-   ```psql -U john -d time_tracker_database -f /dump.sql```
+1. Create migrations
+   ```docker exec api_container alembic upgrade head```
+2. Import data
+   ```docker exec -i postgres_container psql -U john -d time_tracker_database < dump.sql```
 
 ## 🔄 5. Run Database Migrations (Optional)
 If you prefer to start with an empty database instead of using the dump:  

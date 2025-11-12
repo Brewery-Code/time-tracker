@@ -12,7 +12,8 @@ class User(Base):
 
     Attributes:
         id (int): Unique Identifier.
-        full_name (str): Full name of the user.
+        first_name (str): User first name.
+        last_name (str): User last name
         email (str): User email address.
         password (str): Hashed password.
         created_at (datetime): When the user was created.
@@ -21,7 +22,8 @@ class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    full_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
@@ -30,9 +32,9 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
 
     def __str__(self):
-        return self.full_name
+        return f"{self.first_name} {self.last_name}"
 
     def __repr__(self):
-        return f'<User {self.full_name}>'
+        return f'<User {self.first_name} {self.last_name}>'
 
 

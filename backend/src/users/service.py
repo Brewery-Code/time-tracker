@@ -29,8 +29,8 @@ class UserService:
             user (UserCreateSchema): Validated input data.
             session (AsyncSession): DB session.
         """
-        hashed_password = hash_password(user.password)
-        new_user = User(full_name=user.full_name, email=user.email, password=hashed_password)
+        hashed_password = hash_password(user.password1)
+        new_user = User(first_name=user.first_name, last_name=user.last_name, email=user.email, password=hashed_password)
         session.add(new_user)
         await session.commit()
         await session.refresh(new_user)
