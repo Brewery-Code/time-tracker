@@ -85,3 +85,11 @@ class EmployeeWorkDetailSchema(BaseModel):
     period: str
     work_summary: List[WorkSummarySchema]
     total_hours: float
+
+
+class WorkplaceCreateSchema(BaseModel):
+    """
+    Schema using when creating work place
+    """
+    title: str
+    address: str

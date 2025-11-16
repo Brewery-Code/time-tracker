@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends
 
 from src.dependencies import SessionDep
 from src.employee.dependencies import get_current_employer_token
-from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema, EmployeeWorkDetailSchema
+from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema, EmployeeWorkDetailSchema, \
+    WorkplaceCreateSchema
 from src.employee.service import EmployeeService
 from src.users.config import auth
 from src.security import *
@@ -40,3 +41,9 @@ async def start_work(session: SessionDep, token: str = Depends(get_current_emplo
 async def end_work(session: SessionDep, token: str = Depends(get_current_employer_token)):
     """End a new work session."""
     return await EmployeeService.end_work(session, token)
+
+
+@router.post("/workplaces")
+async def add_workplace(data: WorkplaceCreateSchema, session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
+    """Add a new workplace."""
+    return await EmployeeService.add_workplace(data, payload, session)
