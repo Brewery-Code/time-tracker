@@ -7,11 +7,11 @@ from sqlalchemy.orm import selectinload, Session
 
 from src.dependencies import SessionDep
 from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema, EmployeeWorkDetailSchema, \
-    EmployeeReturnDetailSchema, WorkSummarySchema
+    EmployeeReturnDetailSchema, WorkSummarySchema, WorkplaceCreateSchema
 from src.employee.utils import generate_personal_token, hash_personal_token
 from src.utils.users import extract_user_uid_from_token, extract_user_by_id
 from src.users.models import User
-from src.employee.models import Employee, WorkDay, WorkSession
+from src.employee.models import Employee, WorkDay, WorkSession, WorkPlace
 
 
 class EmployeeService:
@@ -224,3 +224,19 @@ class EmployeeService:
 
         await session.commit()
         return {"message": "Work session ended", "worked_for": str(duration)}
+
+
+    async def add_workplace(data: WorkplaceCreateSchema, session: SessionDep, token: str):
+        """
+        Add a new workplace.
+
+        Args:
+            data (WorkplaceCreateSchema): Validated data.
+            session (AsyncSession): Session object.
+            token (str): Employee token.
+        """
+        new_workplace = WorkPlace(title=data.title, address=data.address)
+        session.add(new_workplace)
+        await session.commit()
+        await session.refresh(new_workplace)
+        return {"message": "Workplace added", "workplace_id": new_workplace.id}
