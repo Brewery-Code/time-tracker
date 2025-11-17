@@ -1,9 +1,7 @@
 @import "tailwindcss";
 
 body {
-  color: #fff;
   line-height: 100%;
-  background-color: #0f1214;
 }
 
 .container-base {

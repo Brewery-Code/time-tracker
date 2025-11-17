@@ -1,5 +1,5 @@
 import { ROUTES } from "../shared/model/routes";
-import { createBrowserRouter, redirect } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import { App } from "./app";
 import { Providers } from "./provider";
 
@@ -11,10 +11,10 @@ export const router = createBrowserRouter([
       </Providers>
     ),
     children: [
-      // {
-      //   path: ROUTES.HOME,
-      //   loader: () => import("@pages/"),
-      // },
+      {
+        path: ROUTES.HOME,
+        lazy: () => import("@pages/home/home"),
+      },
       {
         path: ROUTES.LOGIN,
         lazy: () => import("@pages/login/login"),
@@ -22,6 +22,10 @@ export const router = createBrowserRouter([
       {
         path: ROUTES.REGISTER,
         lazy: () => import("@pages/register/register"),
+      },
+      {
+        path: ROUTES.USER,
+        lazy: () => import("@pages/user/user"),
       },
     ],
   },

@@ -13,6 +13,7 @@
       "@shared/*": ["shared/*"],
       "@pages/*": ["pages/*"],
       "@widgets/*": ["widgets/*"],
+      "@widgets": ["widgets/*"],
       "@processes/*": ["processes/*"]
     }
   }

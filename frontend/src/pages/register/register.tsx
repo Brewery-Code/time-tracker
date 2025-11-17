@@ -88,10 +88,10 @@ function RegisterPage() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container maxWidth="xs" className="container-base">
       <CssBaseline />
       {/* Використовуємо Tailwind класи для відступів, тіні та заокруглення */}
-      <Box className="mt-8 flex flex-col items-center p-6 bg-white shadow-xl rounded-lg">
+      <Box className="mt-8 bg-white flex flex-col items-center p-6 shadow-xl rounded-lg">
         <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
           <LockOutlinedIcon />
         </Avatar>
