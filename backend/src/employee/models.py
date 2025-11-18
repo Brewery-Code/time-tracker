@@ -53,7 +53,7 @@ class Employee(Base):
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
     position: Mapped[str] = mapped_column(String(50), nullable=False)
-    profile_photo: Mapped[str] = mapped_column(String(100), nullable=False)
+    profile_photo: Mapped[str] = mapped_column(String(100), nullable=True)
     email: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     phone_number: Mapped[str] = mapped_column(String(13), nullable=False, unique=True)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)

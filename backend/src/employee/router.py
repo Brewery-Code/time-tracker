@@ -1,5 +1,7 @@
+import os
+
 from authx import TokenPayload
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Request
 
 from src.dependencies import SessionDep
 from src.employee.dependencies import get_current_employer_token
@@ -14,21 +16,23 @@ router = APIRouter(prefix="/employees", tags=["employees"])
 
 
 @router.post("", summary="Create a new employee", openapi_extra={"security": [{"JWT Access Cookie": []}]})
-async def create_employee(data: EmployeeCreateSchema, session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
+async def create_employee(session: SessionDep, file: UploadFile = File(...), data: str = Form(...) ,payload: TokenPayload = Depends(auth.access_token_required)):
     """Create a new employee."""
-    return await EmployeeService.create_employee(data, payload, session)
+    employee_data = EmployeeCreateSchema.model_validate_json(data)
+
+    return await EmployeeService.create_employee(data=employee_data, payload=payload, session=session, file=file)
 
 
 @router.get("", summary="Get all employees for current user", response_model=list[EmployeeReturnSchema], openapi_extra={"security": [{"JWT Access Cookie": []}]})
-async def get_all_employees(session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
+async def get_all_employees(request: Request, session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
     """Get all employees for current user."""
-    return await EmployeeService.get_all_employees(session, payload)
+    return await EmployeeService.get_all_employees(request, session, payload)
 
 
 @router.get("/{employee_id}", summary="Get a specific employee", response_model=EmployeeWorkDetailSchema, openapi_extra={"security": [{"JWT Access Cookie": []}]})
-async def get_employee_detail(employee_id: int, session: SessionDep, month: int | None = None, year: int | None = None ,payload: TokenPayload = Depends(auth.access_token_required)):
+async def get_employee_detail(request: Request, employee_id: int, session: SessionDep, month: int | None = None, year: int | None = None ,payload: TokenPayload = Depends(auth.access_token_required)):
     """Get detailed info and work summary for an employee"""
-    return await EmployeeService.get_employee_detail(employee_id, session, month, year, payload)
+    return await EmployeeService.get_employee_detail(request=request, employee_id=employee_id, session=session, month=month, year=year, payload=payload)
 
 
 @router.post("/work/start", summary="Start a new work session", openapi_extra={"security": [{"Employer Header Token": []}]})
