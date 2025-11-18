@@ -1,7 +1,10 @@
+import os
+import shutil
+import uuid
 from datetime import date, datetime, timedelta, timezone
 
 from authx import TokenPayload
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile, File, Request
 from sqlalchemy import select, update, func, extract
 from sqlalchemy.orm import selectinload, Session
 
@@ -20,7 +23,7 @@ class EmployeeService:
     """
 
     @staticmethod
-    async def create_employee(data: EmployeeCreateSchema, payload: TokenPayload, session: SessionDep):
+    async def create_employee(data: EmployeeCreateSchema,payload: TokenPayload, session: SessionDep, file: UploadFile = File(...) ):
         """
         Create a new employee entry in the DB.
 
@@ -28,12 +31,29 @@ class EmployeeService:
             data (EmployeeCreateSchema): Validated data.
             payload (TokenPayload): Validated payload.
             session (Session): Session object.
+            file (UploadFile): Profile photo.
         """
         uid = extract_user_uid_from_token(payload)
         user = await extract_user_by_id(uid, User, session)
 
+        # Generate a unique filename
+        file_extension = file.filename.split(".")[-1]
+        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+
+        upload_dir = "static/employees/profile_photos"
+        file_path = os.path.join(upload_dir, unique_filename)
+        os.makedirs(upload_dir, exist_ok=True)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        profile_photo_url = f"/static/employees/profile_photos/{unique_filename}"
+
         new_employee = Employee(
-            full_name=data.full_name,
+            first_name=data.first_name,
+            last_name=data.last_name,
+            position=data.position,
+            profile_photo=profile_photo_url,
             email=data.email,
             phone_number=data.phone_number,
             user_id=user.id,
@@ -51,13 +71,14 @@ class EmployeeService:
 
 
     @staticmethod
-    async def get_all_employees(session: SessionDep, payload: TokenPayload):
+    async def get_all_employees(request: Request, session: SessionDep, payload: TokenPayload):
         """
         Get all workers for current user.
 
         Args:
             session (AsyncSession): Session object.
             payload (TokenPayload): Validated payload.
+            request (HTTPRequest): Request object.
         """
         user_id = extract_user_uid_from_token(payload)
 
@@ -65,11 +86,11 @@ class EmployeeService:
         result = await session.execute(query)
         employees = result.scalars().all()
 
-        return [EmployeeReturnSchema.model_validate(e) for e in employees]
+        return [EmployeeReturnSchema.model_validate(e).model_dump(context={"request": request}) for e in employees]
 
 
     @staticmethod
-    async def get_employee_detail(employee_id: int, session: SessionDep, month: int | None, year: int | None, payload: TokenPayload) -> EmployeeWorkDetailSchema:
+    async def get_employee_detail(request: Request, employee_id: int, session: SessionDep, month: int | None, year: int | None, payload: TokenPayload) -> EmployeeWorkDetailSchema:
         """
         Get detailed info and work summary for an employee.
 
@@ -123,7 +144,7 @@ class EmployeeService:
             summaries.append(WorkSummarySchema(date=day.work_date, hours=round(hours, 2)))
 
         return EmployeeWorkDetailSchema(
-            employee=EmployeeReturnDetailSchema.model_validate(employee),
+            employee=EmployeeReturnDetailSchema.model_validate(employee).model_dump(context={"request": request}),
             period=period_type,
             work_summary=summaries,
             total_hours=round(total_hours, 2),

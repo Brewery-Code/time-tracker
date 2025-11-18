@@ -2,14 +2,31 @@ import re
 from datetime import datetime, date
 from typing import List
 
-from pydantic import BaseModel, EmailStr, field_validator
+from fastapi import Request
+from pydantic import BaseModel, EmailStr, field_validator, HttpUrl, SerializationInfo, field_serializer
+
+
+def to_absolute_url(value: str | None, info: SerializationInfo) -> str | None:
+    """
+    Converts a relative URL path to an absolute URL using the request context.
+    """
+    if not value:
+        return None
+
+    if info.context and "request" in info.context:
+        request: Request | None = info.context.get("request")
+        if request:
+            return f"{str(request.base_url).rstrip('/')}{value}"
+    return value
 
 
 class EmployeeCreateSchema(BaseModel):
     """
     Schema using for employee creation
     """
-    full_name: str
+    first_name: str
+    last_name: str
+    position: str
     email: EmailStr
     phone_number: str
     workplace_id: int
@@ -41,7 +58,10 @@ class EmployeeReturnSchema(BaseModel):
     Schema using when returning employees information
     """
     id: int
-    full_name: str
+    first_name: str
+    last_name: str
+    position: str
+    profile_photo: str | None
     email: EmailStr
     phone_number: str
     created_at: datetime
@@ -50,6 +70,10 @@ class EmployeeReturnSchema(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+    @field_serializer("profile_photo")
+    def make_photo_url_absolute(self, value: str | None, info: SerializationInfo):
+        return to_absolute_url(value, info)
 
 
 class WorkSummarySchema(BaseModel):
@@ -65,7 +89,10 @@ class EmployeeReturnDetailSchema(BaseModel):
     Schema using when returning employee detail information
     """
     id: int
-    full_name: str
+    first_name: str
+    last_name: str
+    position: str
+    profile_photo: str | None
     email: EmailStr
     phone_number: str
     created_at: datetime
@@ -75,6 +102,10 @@ class EmployeeReturnDetailSchema(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+    @field_serializer("profile_photo")
+    def make_photo_url_absolute(self, value: str | None, info: SerializationInfo):
+        return to_absolute_url(value, info)
 
 
 class EmployeeWorkDetailSchema(BaseModel):

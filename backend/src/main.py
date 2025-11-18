@@ -1,7 +1,10 @@
+import os
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastadmin import fastapi_app as admin_app
 from fastapi.openapi.utils import get_openapi
+from starlette.staticfiles import StaticFiles
 
 from src.users.router import router as user_router
 from src.employee.router import router as employee_router
@@ -47,10 +50,15 @@ def custom_openapi():
     return app.openapi_schema
 
 
+# Static files
+os.makedirs("static/employees/profile_photos", exist_ok=True)
+
+
 # FastAPI app
 app = FastAPI()
 app.openapi = custom_openapi
 app.mount("/admin", admin_app)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(user_router)
 app.include_router(employee_router)
 

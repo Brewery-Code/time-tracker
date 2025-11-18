@@ -37,7 +37,10 @@ class Employee(Base):
 
     Attributes:
         id (int): Unique identifier.
-        full_name (str): Full name of the user.
+        first_name (str): First name of the employee.
+        last_name (str): Last name of the employee.
+        position (str): Position of the employee.
+        profile_photo (str): URL to the profile photo.
         email (str): User email address.
         phone_number (str): User phone number.
         is_active (bool): Whether the user is active or not.
@@ -47,7 +50,10 @@ class Employee(Base):
     __tablename__ = 'employees'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    full_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    first_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    position: Mapped[str] = mapped_column(String(50), nullable=False)
+    profile_photo: Mapped[str] = mapped_column(String(100), nullable=True)
     email: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     phone_number: Mapped[str] = mapped_column(String(13), nullable=False, unique=True)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
@@ -65,10 +71,10 @@ class Employee(Base):
     )
 
     def __str__(self):
-        return self.full_name
+        return f"{self.first_name} {self.last_name}"
 
     def __repr__(self):
-        return f'<Employee {self.full_name}>'
+        return f'<Employee {self.first_name} {self.last_name}>'
 
 
 class WorkDay(Base):
