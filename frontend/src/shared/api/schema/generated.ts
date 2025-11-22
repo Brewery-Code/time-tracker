@@ -4,394 +4,7 @@
  */
 
 export interface paths {
-    "/core/main-slider-items/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Returns a list of slider images.
-         * @description Returns a list of slider images
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully returned a list of slider images */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["MainSliderItem"][];
-                    };
-                };
-                /** @description Invalid request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/core/statistic-block/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Returns a list of data for the statistic block.
-         * @description Returns a list of data for statistic block
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully returned a list of data for statictic block */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["StatisticBlock"][];
-                    };
-                };
-                /** @description Invalid request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/core/partners/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Returns a list of partners.
-         * @description Returns a list of data for partners block
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully returned a list of data for partners block */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Partners"][];
-                    };
-                };
-                /** @description Invalid request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/core/faq/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Returns a list of FAQs (questions and answers).
-         * @description Returns a list of data for the FAQ block
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully returned a list of data for the FAQ block */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["FAQs"][];
-                    };
-                };
-                /** @description Invalid request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/core/educational-programs/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Returns a list of educational programs.
-         * @description Returns a list of data for the edu-programs block.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully returned a list of data for the edu-programs block */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["EducationalProgram"][];
-                    };
-                };
-                /** @description Invalid request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/core/alumni/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Returns a list of Alumni
-         * @description Returns a list of Alumni, optionally filtered by graduation year
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Graduation year to filter alumni */
-                    year?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully returned a list of Alumni */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Alumnus"][];
-                    };
-                };
-                /** @description Invalid request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/core/alumni/years/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Returns a list of graduation years
-         * @description Returns a list of graduation years
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully returned a list of alumni */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": number[];
-                    };
-                };
-                /** @description Invalid request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/core/alumni-slider-items/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Returns a list of alumni slider objects.
-         * @description Returns a list of alumni slider objects
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully returned a list of slider images */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["AlumniSliderItem"][];
-                    };
-                };
-                /** @description Invalid request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/google/": {
+    "/users/register": {
         parameters: {
             query?: never;
             header?: never;
@@ -401,69 +14,17 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Login using Google OAuth2 with PKCE
-         * @description 1) Send JSON body with:
-         *        - `code` (authorization code received from Google after redirect)
-         *        - `code_verifier` (PKCE code verifier generated on frontend)
-         *     2) Backend exchanges the `code` and `code_verifier` for Google access token.
-         *     3) User is created or updated in the local database, and app-specific access and refresh tokens are generated.
-         *     4) **Access token is returned in the JSON response body.**
-         *     5) **Refresh token is set as a secure HttpOnly cookie named `refresh_token`.** *This endpoint does NOT require an Authorization header (no token required) since it is the login endpoint.*
+         * Create a new user
+         * @description Create a new user.
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @description Authorization code received from Google (provided by frontend) */
-                        code: string;
-                        /** @description PKCE code verifier matching the code_challenge sent initially */
-                        code_verifier: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Successfully authenticated, tokens issued */
-                200: {
-                    headers: {
-                        /** @description Refresh token is set in a HttpOnly, Secure cookie */
-                        "Set-Cookie"?: string;
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description OAuth2 access token to use in Authorization header */
-                            access_token?: string;
-                            /** @description Access token lifetime in seconds */
-                            expires_in?: number;
-                            /** @example Bearer */
-                            token_type?: string;
-                        };
-                    };
-                };
-                /** @description Missing code or code_verifier, or Google token exchange error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
+        post: operations["create_user_users_register_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/auth/token/": {
+    "/users/login": {
         parameters: {
             query?: never;
             header?: never;
@@ -473,75 +34,39 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Refresh access token using refresh_token cookie
-         * @description 1) Send POST with body:
-         *        - `client_id=client_id`
-         *        - `grant_type=refresh_token`
+         * Login a user
+         * @description Login a user.
+         */
+        post: operations["login_user_users_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/token-refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Token Refresh
+         * @description Return Updated JWT tokens in cookies.
          *
-         *     2) **Refresh token is NOT sent in the body; it is automatically read from the HttpOnly cookie `refresh_token`.**
-         *     3) If the refresh token is valid, a new access token is returned in the response body.
-         *     4) A new refresh token cookie is also set to replace the old one. *This endpoint does NOT require an Authorization header because refresh token is taken from the cookie.*
+         *     Requires refresh token cookie.
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/x-www-form-urlencoded": {
-                        /**
-                         * @description Client token from API
-                         * @enum {string}
-                         */
-                        client_id: "client_id";
-                        /**
-                         * @description Must be exactly `refresh_token`
-                         * @enum {string}
-                         */
-                        grant_type: "refresh_token";
-                    };
-                };
-            };
-            responses: {
-                /** @description Access token successfully refreshed */
-                200: {
-                    headers: {
-                        /** @description Updated refresh token set in cookie */
-                        "Set-Cookie"?: string;
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description New access token */
-                            access_token?: string;
-                            /** @description Access token lifetime in seconds */
-                            expires_in?: number;
-                            /** @example Bearer */
-                            token_type?: string;
-                        };
-                    };
-                };
-                /** @description Invalid request or missing/invalid refresh token */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
+        post: operations["token_refresh_users_token_refresh_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/users/me/": {
+    "/users/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -549,47 +74,58 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get current authenticated user information
-         * @description Returns information about the currently authenticated user.   Requires a valid `access` token via Authorization header.
+         * Get current user's info
+         * @description Get current user's info.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully returned user info */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["User"];
-                    };
-                };
-                /** @description Unauthorized or token missing/invalid */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Internal server error during profile fetching */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
+        get: operations["get_current_user_users_me_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Deactivate a user's profile
+         * @description Deactivate a user's profile.
+         */
+        delete: operations["deactivate_user_users_me_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
+        /**
+         * Get all employees for current user
+         * @description Get all employees for current user.
+         */
+        get: operations["get_all_employees_employees_get"];
+        put?: never;
+        /**
+         * Create a new employee
+         * @description Create a new employee.
+         */
+        post: operations["create_employee_employees_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a specific employee
+         * @description Get detailed info and work summary for an employee
+         */
+        get: operations["get_employee_detail_employees__employee_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -598,279 +134,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/role/": {
+    "/employees/work/start": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get current user role
-         * @description Returns information about role current user. (Required `access` token in headers for auth user)
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully returned information */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            id?: number;
-                            role?: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized or token missing/invalid */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
+        get?: never;
         put?: never;
-        post?: never;
+        /**
+         * Start a new work session
+         * @description Start a new work session.
+         */
+        post: operations["start_work_employees_work_start_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/events/": {
+    "/employees/work/end": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * Returns a list of events.
-         * @description Returns list of the events.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Event list successfully returned */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Events"][];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            detail?: string;
-                        };
-                    };
-                };
-            };
-        };
+        get?: never;
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/events/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
         /**
-         * Returns details of a single event by its unique ID.
-         * @description Returns a single event object by its unique ID.
+         * End a new work session
+         * @description End a new work session.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Unique identifier of the event */
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Event object successfully returned */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Events"];
-                    };
-                };
-                /** @description Bad request (invalid ID or malformed request) */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            detail?: string;
-                        };
-                    };
-                };
-                /** @description Event not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            detail?: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/departments/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Returns a list of departments
-         * @description Returns a list of departments
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Departments list successfully returned */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Departments"][];
-                    };
-                };
-                /** @description Bad request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            detail?: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/departments/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Returns details of a single department by its unique ID.
-         * @description Returns a single department object by its unique ID.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Unique identifier of the event */
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Department object successfully returned */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["DepartmentDetail"];
-                    };
-                };
-                /** @description Bad request (invalid ID or malformed request) */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            detail?: string;
-                        };
-                    };
-                };
-                /** @description Event not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            detail?: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
+        post: operations["end_work_employees_work_end_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -881,235 +178,176 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        Error: {
-            /** @description Error code */
-            code: string;
-            /** @description Human readable error message */
-            message: string;
-        };
-        MainSliderItem: {
-            /** ID */
-            readonly id?: number;
-            /**
-             * Image
-             * Format: uri
-             */
-            readonly image?: string;
-        };
-        StatisticBlock: {
-            /** ID */
-            readonly id?: number;
-            /** Title */
-            readonly title?: string;
-            /** Description */
-            readonly description?: string;
-            /** Start Value */
-            readonly start_value?: number;
-            /** Order */
-            readonly order?: number;
-        };
-        User: {
-            /** ID */
-            readonly id?: number;
-            /** First name */
-            readonly first_name?: string;
-            /** Last name */
-            readonly last_name?: string;
+        /**
+         * EmployeeCreateSchema
+         * @description Schema using for employee creation
+         */
+        EmployeeCreateSchema: {
+            /** Full Name */
+            full_name: string;
             /**
              * Email
              * Format: email
              */
-            readonly email?: string;
-            /**
-             * Avatar
-             * Format: uri
-             */
-            readonly avatar?: string;
+            email: string;
+            /** Phone Number */
+            phone_number: string;
+            /** Workplace Id */
+            workplace_id: number;
         };
-        Events: {
-            /** ID */
-            readonly id?: number;
-            /** Title */
-            readonly title?: string;
-            /** Body */
-            readonly body?: string;
-            /** HTML Body */
-            readonly body_html?: string;
-            category?: {
-                id?: number;
-                name?: string;
-                /** @example (244,255,244,0.1) */
-                rgb_color?: string;
-            };
+        /**
+         * EmployeeReturnDetailSchema
+         * @description Schema using when returning employee detail information
+         */
+        EmployeeReturnDetailSchema: {
+            /** Id */
+            id: number;
+            /** Full Name */
+            full_name: string;
             /**
-             * Format: date-time
-             * @example 2025-06-30T11:39:01.957067Z
-             */
-            readonly created_at?: string;
-            /**
-             * Format: date-time
-             * @example 2025-06-30T12:10:46.028492Z
-             */
-            readonly updated_at?: string;
-        };
-        Partners: {
-            /** ID */
-            readonly id?: number;
-            /** Name */
-            readonly name?: string;
-            /**
-             * Image
-             * Format: uri
-             */
-            readonly image?: string;
-            /**
-             * Site url
-             * Format: uri
-             */
-            readonly site_url?: string;
-        };
-        FAQs: {
-            /** ID */
-            readonly id?: number;
-            /** Question */
-            readonly question?: string;
-            /** Question */
-            readonly answer?: string;
-        };
-        CategorizedTag: {
-            readonly id?: number;
-            name?: string;
-        };
-        EducationalProgram: {
-            /** ID */
-            readonly id?: number;
-            /** Program code */
-            code?: string;
-            /** Educational program name */
-            name?: string;
-            /** Subjects */
-            readonly subject?: components["schemas"]["CategorizedTag"][];
-            /** Education Forms */
-            readonly education_forms?: components["schemas"]["CategorizedTag"][];
-            /** Education Levels */
-            readonly education_levels?: components["schemas"]["CategorizedTag"][];
-        };
-        EducationalProgramFull: components["schemas"]["EducationalProgram"] & {
-            description?: string;
-            bachelor?: {
-                code?: string;
-                specialty?: string;
-                program?: string;
-            } | null;
-            magistracy?: {
-                code?: string;
-                specialty?: string;
-                program?: string;
-            } | null;
-            postgraduate?: {
-                code?: string;
-                specialty?: string;
-                program?: string;
-            } | null;
-        };
-        Departments: {
-            /** ID */
-            readonly id?: number;
-            /** Department name */
-            name?: string;
-        };
-        DepartmentDetail: {
-            /** ID */
-            readonly id?: number;
-            /**
-             * Department name
-             * @description Translated name of the department
-             */
-            name?: string;
-            /**
-             * Department description
-             * @description Translated description of the department
-             */
-            description?: string;
-            /**
-             * Department address
-             * @description Translated address of the department
-             */
-            address?: string;
-            /**
-             * Email address
+             * Email
              * Format: email
              */
-            email?: string;
-            /** Head(s) of Department */
-            head_of_department?: {
-                /** ID */
-                id?: number;
-                /**
-                 * Regalia
-                 * @description Translated regalia/title of the head
-                 */
-                regalia?: string;
-                /**
-                 * Full name
-                 * @description Translated full name
-                 */
-                full_name?: string;
-                /**
-                 * Email
-                 * Format: email
-                 */
-                email?: string;
-                /** Audience */
-                audience?: string;
-            }[];
-            /** Educational Programs */
-            educational_program?: components["schemas"]["EducationalProgramFull"][];
-        };
-        Alumnus: {
-            /** ID */
-            readonly id?: number;
-            /** Full name */
-            readonly full_name?: string;
-            /** About student */
-            readonly text?: string;
-            /** Format: uri */
-            readonly image?: string;
+            email: string;
+            /** Phone Number */
+            phone_number: string;
             /**
-             * Created at
+             * Created At
              * Format: date-time
              */
-            readonly created_at?: string;
+            created_at: string;
+            workplace: components["schemas"]["WorkPlaceReturnSchema"];
+            /** Personal Token */
+            personal_token: string;
+        };
+        /**
+         * EmployeeReturnSchema
+         * @description Schema using when returning employees information
+         */
+        EmployeeReturnSchema: {
+            /** Id */
+            id: number;
+            /** Full Name */
+            full_name: string;
             /**
-             * Date of graduation
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Phone Number */
+            phone_number: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            workplace: components["schemas"]["WorkPlaceReturnSchema"];
+        };
+        /**
+         * EmployeeWorkDetailSchema
+         * @description Schema using when returning employee work detail information
+         */
+        EmployeeWorkDetailSchema: {
+            employee: components["schemas"]["EmployeeReturnDetailSchema"];
+            /** Period */
+            period: string;
+            /** Work Summary */
+            work_summary: components["schemas"]["WorkSummarySchema"][];
+            /** Total Hours */
+            total_hours: number;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * UserCreateSchema
+         * @description Schema used when creating a new user.
+         */
+        UserCreateSchema: {
+            /** First Name */
+            first_name: string;
+            /** Last Name */
+            last_name: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password1 */
+            password1: string;
+            /** Password2 */
+            password2: string;
+        };
+        /**
+         * UserCurrentSchema
+         * @description Schema used for current user return.
+         */
+        UserCurrentSchema: {
+            /** Id */
+            id: number;
+            /** First Name */
+            first_name: string;
+            /** Last Name */
+            last_name: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /**
+         * UserLoginSchema
+         * @description Schema used when user trying to log-in
+         */
+        UserLoginSchema: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+        };
+        /**
+         * WorkPlaceReturnSchema
+         * @description Schema using when returning work place
+         */
+        WorkPlaceReturnSchema: {
+            /** Id */
+            id: number;
+            /** Title */
+            title: string;
+            /** Address */
+            address: string;
+        };
+        /**
+         * WorkSummarySchema
+         * @description Schema using when returning work summary
+         */
+        WorkSummarySchema: {
+            /**
+             * Date
              * Format: date
              */
-            readonly date_of_graduation?: string;
-            /**
-             * Social links or publications
-             * @description Dictionary of social/profile links
-             * @example {
-             *       "instagram": "https://instagram.com/example",
-             *       "telegram": "https://t.me/example",
-             *       "facebook": "https://facebook.com/example"
-             *     }
-             */
-            links?: {
-                [key: string]: string;
-            };
-            readonly major?: string;
-            readonly degree?: string;
-            readonly workplace?: string;
-            readonly position?: string;
-        };
-        AlumniSliderItem: {
-            /** ID */
-            readonly id?: number;
-            /**
-             * Image
-             * Format: uri
-             */
-            readonly image?: string;
+            date: string;
+            /** Hours */
+            hours: number;
         };
     };
     responses: never;
@@ -1119,4 +357,258 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+    create_user_users_register_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserCreateSchema"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    login_user_users_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserLoginSchema"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    token_refresh_users_token_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_current_user_users_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserCurrentSchema"];
+                };
+            };
+        };
+    };
+    deactivate_user_users_me_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_all_employees_employees_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeReturnSchema"][];
+                };
+            };
+        };
+    };
+    create_employee_employees_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeCreateSchema"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_employee_detail_employees__employee_id__get: {
+        parameters: {
+            query?: {
+                month?: number | null;
+                year?: number | null;
+            };
+            header?: never;
+            path: {
+                employee_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeWorkDetailSchema"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_work_employees_work_start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    end_work_employees_work_end_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+}

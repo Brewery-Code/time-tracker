@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   Avatar,
   Button,
@@ -11,86 +10,56 @@ import {
   Container,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-// Типізація для об'єкта помилок
-interface FormErrors {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
+import { useNavigate } from "react-router-dom";
+import { Controller, useForm } from "react-hook-form";
+import { publicRqClient } from "@shared/api/instance";
+import { ROUTES } from "@shared/model/routes";
+
+interface LoginForm {
+  email: string;
+  password: string;
 }
 
 function LoginPage() {
-  // Стан для зберігання даних форми
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+  const navigate = useNavigate();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm<LoginForm>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  // Стан для зберігання помилок валідації
-  const [errors, setErrors] = useState<FormErrors>({});
+  const loginMutation = publicRqClient.useMutation("post", "/users/login", {
+    onSuccess() {
+      navigate(ROUTES.HOME);
+    },
+    onError(error) {
+      if (typeof error.detail === "string") {
+        // звичайний рядок
+        setError("password", { type: "server", message: error.detail });
+      } else if (Array.isArray(error.detail)) {
+        // масив помилок від backend
+        const firstErrorMsg = error.detail[0]?.msg || "Сталася помилка";
+        setError("password", { type: "server", message: firstErrorMsg });
+      } else {
+        setError("password", { type: "server", message: "Сталася помилка" });
+      }
+    },
+  });
 
-  // Обробник зміни значень в полях вводу
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  // Функція валідації
-  const validate = (): FormErrors => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.firstName) newErrors.firstName = "Ім'я є обов'язковим";
-    if (!formData.lastName) newErrors.lastName = "Прізвище є обов'язковим";
-    if (!formData.email) {
-      newErrors.email = "Email є обов'язковим";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Введіть коректний email";
-    }
-    if (!formData.password) {
-      newErrors.password = "Пароль є обов'язковим";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Пароль має містити щонайменше 6 символів";
-    }
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Паролі не співпадають";
-    }
-
-    return newErrors;
-  };
-
-  // Обробник відправки форми
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const validationErrors = validate();
-    setErrors(validationErrors);
-
-    // Якщо об'єкт помилок порожній - форма валідна
-    if (Object.keys(validationErrors).length === 0) {
-      console.log("Дані форми відправлено:", formData);
-      // Тут буде логіка відправки даних на сервер
-      alert("Реєстрація успішна!");
-      // Очищення форми
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
-    }
-  };
+  function onSubmit(data: LoginForm) {
+    loginMutation.mutate({ body: data });
+  }
 
   return (
     <Container maxWidth="xs" className="container-base">
       <CssBaseline />
-      {/* Використовуємо Tailwind класи для відступів, тіні та заокруглення */}
       <Box className="mt-8 bg-white flex flex-col items-center p-6 shadow-xl rounded-lg">
         <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
           <LockOutlinedIcon />
@@ -98,37 +67,58 @@ function LoginPage() {
         <Typography component="h1" variant="h5">
           Створити акаунт
         </Typography>
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          {/* Поле Email */}
+        <Box
+          component="form"
+          noValidate
+          onSubmit={handleSubmit(onSubmit)}
+          sx={{ mt: 3 }}
+        >
           <Grid container spacing={2}>
             <Grid width={"100%"}>
-              <TextField
-                required
-                fullWidth
-                id="email"
-                label="Email адреса"
+              <Controller
                 name="email"
-                autoComplete="email"
-                value={formData.email}
-                onChange={handleChange}
-                error={!!errors.email}
-                helperText={errors.email}
+                control={control}
+                rules={{
+                  required: "email є обов'язковим",
+                  pattern: {
+                    value: /\S+@\S+\.\S+/,
+                    message: "Некоректний email",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    label="Email адреса"
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                  />
+                )}
               />
             </Grid>
-            {/* Поле Пароль */}
-            <Grid width={"100%"}>
-              <TextField
-                required
-                fullWidth
+            <Grid width="100%">
+              <Controller
                 name="password"
-                label="Пароль"
-                type="password"
-                id="password"
-                autoComplete="new-password"
-                value={formData.password}
-                onChange={handleChange}
-                error={!!errors.password}
-                helperText={errors.password}
+                control={control}
+                rules={{
+                  required: "Пароль є обов'язковим",
+                  minLength: {
+                    value: 6,
+                    message: "Пароль має містити щонайменше 6 символів",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    type="password"
+                    label="Пароль"
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
+                  />
+                )}
               />
             </Grid>
           </Grid>
@@ -136,7 +126,6 @@ function LoginPage() {
             type="submit"
             fullWidth
             variant="contained"
-            // Використовуємо sx prop від MUI для відступів, але можна і Tailwind
             sx={{ mt: 3, mb: 2 }}
           >
             Зареєструватися

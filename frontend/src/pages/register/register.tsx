@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   Avatar,
   Button,
@@ -11,181 +10,199 @@ import {
   Container,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-// Типізація для об'єкта помилок
-interface FormErrors {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
+import { useForm, Controller, type SubmitHandler } from "react-hook-form";
+import { publicRqClient } from "@shared/api/instance";
+import type { ApiSchemas } from "@shared/api/schema";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@shared/model/routes";
+
+interface RegisterForm {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 }
 
 function RegisterPage() {
-  // Стан для зберігання даних форми
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+  const navigate = useNavigate();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<RegisterForm>({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
 
-  // Стан для зберігання помилок валідації
-  const [errors, setErrors] = useState<FormErrors>({});
+  const passwordValue = watch("password");
 
-  // Обробник зміни значень в полях вводу
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+  const registerMutation = publicRqClient.useMutation(
+    "post",
+    "/users/register",
+    {
+      onSuccess() {
+        navigate(ROUTES.HOME);
+      },
+    },
+  );
 
-  // Функція валідації
-  const validate = (): FormErrors => {
-    const newErrors: FormErrors = {};
+  const onSubmit: SubmitHandler<RegisterForm> = (data) => {
+    const apiData: ApiSchemas["UserCreateSchema"] = {
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      password1: data.password,
+      password2: data.confirmPassword,
+    };
 
-    if (!formData.firstName) newErrors.firstName = "Ім'я є обов'язковим";
-    if (!formData.lastName) newErrors.lastName = "Прізвище є обов'язковим";
-    if (!formData.email) {
-      newErrors.email = "Email є обов'язковим";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Введіть коректний email";
-    }
-    if (!formData.password) {
-      newErrors.password = "Пароль є обов'язковим";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Пароль має містити щонайменше 6 символів";
-    }
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Паролі не співпадають";
-    }
-
-    return newErrors;
-  };
-
-  // Обробник відправки форми
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const validationErrors = validate();
-    setErrors(validationErrors);
-
-    // Якщо об'єкт помилок порожній - форма валідна
-    if (Object.keys(validationErrors).length === 0) {
-      console.log("Дані форми відправлено:", formData);
-      // Тут буде логіка відправки даних на сервер
-      alert("Реєстрація успішна!");
-      // Очищення форми
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
-    }
+    registerMutation.mutate({ body: apiData });
   };
 
   return (
     <Container maxWidth="xs" className="container-base">
       <CssBaseline />
-      {/* Використовуємо Tailwind класи для відступів, тіні та заокруглення */}
       <Box className="mt-8 bg-white flex flex-col items-center p-6 shadow-xl rounded-lg">
         <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
           <LockOutlinedIcon />
         </Avatar>
+
         <Typography component="h1" variant="h5">
           Створити акаунт
         </Typography>
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+
+        <Box
+          component="form"
+          noValidate
+          onSubmit={handleSubmit(onSubmit)}
+          sx={{ mt: 3 }}
+        >
           <Grid container spacing={2}>
-            {/* Поля Ім'я та Прізвище */}
-            <Grid width={"100%"}>
-              <TextField
-                autoComplete="given-name"
+            <Grid width="100%">
+              <Controller
                 name="firstName"
-                required
-                fullWidth
-                id="firstName"
-                label="Ім'я"
-                autoFocus
-                value={formData.firstName}
-                onChange={handleChange}
-                error={!!errors.firstName}
-                helperText={errors.firstName}
+                control={control}
+                rules={{ required: "Ім'я є обов'язковим" }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    label="Ім'я"
+                    error={!!errors.firstName}
+                    helperText={errors.firstName?.message}
+                  />
+                )}
               />
             </Grid>
-            <Grid width={"100%"}>
-              <TextField
-                required
-                fullWidth
-                id="lastName"
-                label="Прізвище"
+
+            <Grid width="100%">
+              <Controller
                 name="lastName"
-                autoComplete="family-name"
-                value={formData.lastName}
-                onChange={handleChange}
-                error={!!errors.lastName}
-                helperText={errors.lastName}
+                control={control}
+                rules={{ required: "Прізвище є обов'язковим" }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    label="Прізвище"
+                    error={!!errors.lastName}
+                    helperText={errors.lastName?.message}
+                  />
+                )}
               />
             </Grid>
-            {/* Поле Email */}
-            <Grid width={"100%"}>
-              <TextField
-                required
-                fullWidth
-                id="email"
-                label="Email адреса"
+
+            <Grid width="100%">
+              <Controller
                 name="email"
-                autoComplete="email"
-                value={formData.email}
-                onChange={handleChange}
-                error={!!errors.email}
-                helperText={errors.email}
+                control={control}
+                rules={{
+                  required: "Email є обов'язковим",
+                  pattern: {
+                    value: /\S+@\S+\.\S+/,
+                    message: "Некоректний email",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    label="Email адреса"
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                  />
+                )}
               />
             </Grid>
-            {/* Поле Пароль */}
-            <Grid width={"100%"}>
-              <TextField
-                required
-                fullWidth
+
+            <Grid width="100%">
+              <Controller
                 name="password"
-                label="Пароль"
-                type="password"
-                id="password"
-                autoComplete="new-password"
-                value={formData.password}
-                onChange={handleChange}
-                error={!!errors.password}
-                helperText={errors.password}
+                control={control}
+                rules={{
+                  required: "Пароль є обов'язковим",
+                  minLength: {
+                    value: 6,
+                    message: "Пароль має містити щонайменше 6 символів",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    type="password"
+                    label="Пароль"
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
+                  />
+                )}
               />
             </Grid>
-            {/* Поле Підтвердження пароля */}
-            <Grid width={"100%"}>
-              <TextField
-                required
-                fullWidth
+
+            <Grid width="100%">
+              <Controller
                 name="confirmPassword"
-                label="Підтвердіть пароль"
-                type="password"
-                id="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                error={!!errors.confirmPassword}
-                helperText={errors.confirmPassword}
+                control={control}
+                rules={{
+                  required: "Підтвердіть пароль",
+                  validate: (value) =>
+                    value === passwordValue || "Паролі не співпадають",
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    type="password"
+                    label="Підтвердіть пароль"
+                    error={!!errors.confirmPassword}
+                    helperText={errors.confirmPassword?.message}
+                  />
+                )}
               />
             </Grid>
           </Grid>
+
           <Button
             type="submit"
             fullWidth
             variant="contained"
-            // Використовуємо sx prop від MUI для відступів, але можна і Tailwind
             sx={{ mt: 3, mb: 2 }}
           >
             Зареєструватися
           </Button>
+
           <Grid container justifyContent="flex-end">
             <Grid>
               <Link href="/login" variant="body2">
