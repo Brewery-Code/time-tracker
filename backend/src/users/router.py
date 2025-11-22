@@ -10,9 +10,9 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/register", summary="Create a new user")
-async def create_user(user: UserCreateSchema, session: SessionDep):
+async def create_user(response: Response, user: UserCreateSchema, session: SessionDep):
     """Create a new user."""
-    return await UserService.create_user(user, session)
+    return await UserService.create_user(response, user, session)
 
 
 @router.post("/login", summary="Login a user")

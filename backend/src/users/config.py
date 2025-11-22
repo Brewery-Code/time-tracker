@@ -12,5 +12,7 @@ config = AuthXConfig(
     JWT_REFRESH_TOKEN_EXPIRES=timedelta(days=5),
     JWT_COOKIE_SAMESITE="lax",
     JWT_COOKIE_CSRF_PROTECT=False,
+    # JWT_COOKIE_HTTP_ONLY = False,
+    # JWT_SESSION_COOKIE = True,
 )
 auth = AuthX(config=config)
