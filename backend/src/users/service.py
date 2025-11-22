@@ -21,7 +21,7 @@ class UserService:
     """
 
     @staticmethod
-    async def create_user(user: UserCreateSchema, session: AsyncSession):
+    async def create_user(response: Response, user: UserCreateSchema, session: AsyncSession):
         """
         Create a new user entry in the DB.
 
@@ -34,6 +34,10 @@ class UserService:
         session.add(new_user)
         await session.commit()
         await session.refresh(new_user)
+        access_token = auth.create_access_token(uid=str(new_user.id))
+        refresh_token = auth.create_refresh_token(uid=str(new_user.id))
+        auth.set_access_cookies(access_token, response)
+        auth.set_refresh_cookies(refresh_token, response)
         logger.info(f"User with email {new_user.email} created. His ID is {new_user.id}.")
         return {"status_code": 201, "message": "User created successfully."}
 
