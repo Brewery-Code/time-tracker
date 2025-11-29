@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import List
 
 from fastapi import Request
@@ -53,6 +53,25 @@ class WorkPlaceReturnSchema(BaseModel):
     }
 
 
+class WorkTimeStatusSchema(BaseModel):
+    """
+    Schema using when returning work time status
+    """
+    today: timedelta | None
+    week: timedelta | None
+    month: timedelta | None
+
+    @field_serializer('today', 'week', 'month')
+    def serialize_duration(self, value: timedelta | None, _info):
+        if not value:
+            return "00:00"
+
+        total_seconds = int(value.total_seconds())
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        return f"{hours:02}:{minutes:02}"
+
+
 class EmployeeReturnSchema(BaseModel):
     """
     Schema using when returning employees information
@@ -74,6 +93,17 @@ class EmployeeReturnSchema(BaseModel):
     @field_serializer("profile_photo")
     def make_photo_url_absolute(self, value: str | None, info: SerializationInfo):
         return to_absolute_url(value, info)
+
+
+class EmployeeWithStatsReturnSchema(EmployeeReturnSchema):
+    """
+    Schema using when returning employee information with work time
+    """
+    work_stats: WorkTimeStatusSchema
+
+    model_config = {
+        "from_attributes": True
+    }
 
 
 class WorkSummarySchema(BaseModel):
