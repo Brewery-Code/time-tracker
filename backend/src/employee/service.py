@@ -10,7 +10,7 @@ from sqlalchemy.orm import selectinload, Session
 
 from src.dependencies import SessionDep
 from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema, EmployeeWorkDetailSchema, \
-    EmployeeReturnDetailSchema, WorkSummarySchema, WorkplaceCreateSchema
+    EmployeeReturnDetailSchema, WorkSummarySchema, WorkplaceCreateSchema, EmployeeWithStatsReturnSchema
 from src.employee.utils import generate_personal_token, hash_personal_token
 from src.utils.users import extract_user_uid_from_token, extract_user_by_id
 from src.users.models import User
@@ -82,12 +82,57 @@ class EmployeeService:
         """
         user_id = extract_user_uid_from_token(payload)
 
-        query = select(Employee).where(Employee.user_id == user_id).options(selectinload(Employee.workplace))
+        # дати для фільтрації
+        today = date.today()
+        start_of_week = today - timedelta(days=today.weekday())
+        start_of_month = today.replace(day=1)
+
+        def get_duration_subquery(start_date):
+            return (
+                select(func.sum(WorkDay.total_duration))
+                .where(WorkDay.employee_id == Employee.id)
+                .where(WorkDay.work_date >= start_date)
+                .correlate(Employee)
+                .scalar_subquery()
+            )
+
+        sq_today = select(func.sum(WorkDay.total_duration)) \
+            .where(WorkDay.employee_id == Employee.id) \
+            .where(WorkDay.work_date == today) \
+            .correlate(Employee) \
+            .scalar_subquery()
+
+        sq_week = get_duration_subquery(start_of_week)
+        sq_month = get_duration_subquery(start_of_month)
+
+        query = (
+            select(
+                Employee,
+                sq_today.label("hours_today"),
+                sq_week.label("hours_week"),
+                sq_month.label("hours_month")
+            )
+            .where(Employee.user_id == user_id)
+            .options(selectinload(Employee.workplace))
+        )
+
         result = await session.execute(query)
-        employees = result.scalars().all()
+        rows = result.all()
 
-        return [EmployeeReturnSchema.model_validate(e).model_dump(context={"request": request}) for e in employees]
+        response_data = []
+        for row in rows:
+            employee = row[0]
+            emp_dict = EmployeeReturnSchema.model_validate(employee).model_dump(context={"request": request})
 
+            emp_dict["work_stats"] = {
+                "today": row[1],
+                "week": row[2],
+                "month": row[3]
+            }
+
+            response_data.append(emp_dict)
+
+        return [EmployeeWithStatsReturnSchema.model_validate(data) for data in response_data]
 
     @staticmethod
     async def get_employee_detail(request: Request, employee_id: int, session: SessionDep, month: int | None, year: int | None, payload: TokenPayload) -> EmployeeWorkDetailSchema:

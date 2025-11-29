@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, Request
 from src.dependencies import SessionDep
 from src.employee.dependencies import get_current_employer_token
 from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema, EmployeeWorkDetailSchema, \
-    WorkplaceCreateSchema
+    WorkplaceCreateSchema, EmployeeWithStatsReturnSchema
 from src.employee.service import EmployeeService
 from src.users.config import auth
 from src.security import *
@@ -23,7 +23,7 @@ async def create_employee(session: SessionDep, file: UploadFile = File(...), dat
     return await EmployeeService.create_employee(data=employee_data, payload=payload, session=session, file=file)
 
 
-@router.get("", summary="Get all employees for current user", response_model=list[EmployeeReturnSchema], openapi_extra={"security": [{"JWT Access Cookie": []}]})
+@router.get("", summary="Get all employees for current user", response_model=list[EmployeeWithStatsReturnSchema], openapi_extra={"security": [{"JWT Access Cookie": []}]})
 async def get_all_employees(request: Request, session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
     """Get all employees for current user."""
     return await EmployeeService.get_all_employees(request, session, payload)
