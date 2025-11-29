@@ -1,4 +1,5 @@
 import os
+from datetime import date
 
 from authx import TokenPayload
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Request
@@ -30,9 +31,9 @@ async def get_all_employees(request: Request, session: SessionDep, payload: Toke
 
 
 @router.get("/{employee_id}", summary="Get a specific employee", response_model=EmployeeWorkDetailSchema, openapi_extra={"security": [{"JWT Access Cookie": []}]})
-async def get_employee_detail(request: Request, employee_id: int, session: SessionDep, month: int | None = None, year: int | None = None ,payload: TokenPayload = Depends(auth.access_token_required)):
+async def get_employee_detail(request: Request, employee_id: int, session: SessionDep, week: date | None = None, month: date | None = None,payload: TokenPayload = Depends(auth.access_token_required)):
     """Get detailed info and work summary for an employee"""
-    return await EmployeeService.get_employee_detail(request=request, employee_id=employee_id, session=session, month=month, year=year, payload=payload)
+    return await EmployeeService.get_employee_detail(request=request, employee_id=employee_id, session=session, month=month, week=week, payload=payload)
 
 
 @router.post("/work/start", summary="Start a new work session", openapi_extra={"security": [{"Employer Header Token": []}]})
