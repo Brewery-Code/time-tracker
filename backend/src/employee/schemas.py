@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, time
 from typing import List
 
 from fastapi import Request
@@ -108,10 +108,15 @@ class EmployeeWithStatsReturnSchema(EmployeeReturnSchema):
 
 class WorkSummarySchema(BaseModel):
     """
-    Schema using when returning work summary
+    Повертає статистику за день.
+    hours - це об'єкт time (наприклад 08:45:00) або None.
     """
     date: date
-    hours: float
+    work_time: time | None
+
+    model_config = {
+        "from_attributes": True
+    }
 
 
 class EmployeeReturnDetailSchema(BaseModel):

@@ -1,6 +1,7 @@
 import os
 import shutil
 import uuid
+from calendar import monthrange
 from datetime import date, datetime, timedelta, timezone
 
 from authx import TokenPayload
@@ -134,18 +135,16 @@ class EmployeeService:
 
         return [EmployeeWithStatsReturnSchema.model_validate(data) for data in response_data]
 
-    @staticmethod
-    async def get_employee_detail(request: Request, employee_id: int, session: SessionDep, month: int | None, year: int | None, payload: TokenPayload) -> EmployeeWorkDetailSchema:
-        """
-        Get detailed info and work summary for an employee.
 
-        Args:
-            employee_id (int): Employee ID.
-            session (AsyncSession): AsyncSession object.
-            month (int, optional): Month.
-            year (int, optional): Year.
-            payload (TokenPayload): Validated payload.
-        """
+    @staticmethod
+    async def get_employee_detail(
+            request: Request,
+            employee_id: int,
+            session: SessionDep,
+            week: date | None,
+            month: date | None,
+            payload: TokenPayload
+    ) -> EmployeeWorkDetailSchema:
         user_id = extract_user_uid_from_token(payload)
 
         query = (
@@ -159,41 +158,56 @@ class EmployeeService:
         if not employee:
             raise HTTPException(status_code=404, detail="Employee not found or access denied")
 
+        period_type = "today"
         today = date.today()
 
-        if month and year:
-            stmt = select(WorkDay).where(
-                WorkDay.employee_id == employee.id,
-                extract("month", WorkDay.work_date) == month,
-                extract("year", WorkDay.work_date) == year,
-            )
+        if week:
+            start_date = week - timedelta(days=week.weekday())
+            end_date = start_date + timedelta(days=6)
+            period_type = "week"
+        elif month:
+            start_date = month.replace(day=1)
+            _, days_in_month = monthrange(start_date.year, start_date.month)
+            end_date = start_date.replace(day=days_in_month)
             period_type = "month"
         else:
-            start_week = today - timedelta(days=today.weekday())
-            end_week = start_week + timedelta(days=6)
-            stmt = select(WorkDay).where(
-                WorkDay.employee_id == employee.id,
-                WorkDay.work_date.between(start_week, end_week),
-            )
-            period_type = "week"
+            start_date = today
+            end_date = today
+            period_type = "today"
 
+        stmt = select(WorkDay).where(
+            WorkDay.employee_id == employee.id,
+            WorkDay.work_date.between(start_date, end_date)
+        )
         result = await session.execute(stmt)
-        work_days = result.scalars().all()
-
+        db_work_days = result.scalars().all()
+        work_map = {wd.work_date: wd.total_duration for wd in db_work_days}
         summaries: list[WorkSummarySchema] = []
-        total_hours = 0.0
+        total_period_hours_float = 0.0
 
-        for day in work_days:
-            hours = (day.total_duration.total_seconds() / 3600) if day.total_duration else 0
-            total_hours += hours
-            summaries.append(WorkSummarySchema(date=day.work_date, hours=round(hours, 2)))
+        current_date = start_date
+        while current_date <= end_date:
+            duration = work_map.get(current_date)
+
+            hours_time_obj = None
+            if duration:
+                total_period_hours_float += duration.total_seconds() / 3600
+                hours_time_obj = (datetime.min + duration).time()
+
+            summaries.append(WorkSummarySchema(
+                date=current_date,
+                work_time=hours_time_obj
+            ))
+
+            current_date += timedelta(days=1)
 
         return EmployeeWorkDetailSchema(
             employee=EmployeeReturnDetailSchema.model_validate(employee).model_dump(context={"request": request}),
             period=period_type,
             work_summary=summaries,
-            total_hours=round(total_hours, 2),
+            total_hours=round(total_period_hours_float, 2),
         )
+
 
     @staticmethod
     async def start_work(session: SessionDep, token: str):
