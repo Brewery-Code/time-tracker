@@ -5,6 +5,7 @@ export const ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
   USER: "/user/:userId",
+  TRACKER: "/tracker",
 } as const;
 
 export type PathParams = {

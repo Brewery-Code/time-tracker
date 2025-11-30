@@ -27,6 +27,10 @@ export const router = createBrowserRouter([
         path: ROUTES.USER,
         lazy: () => import("@pages/user/user"),
       },
+      {
+        path: ROUTES.TRACKER,
+        lazy: () => import("@pages/tracker/tracker"),
+      },
     ],
   },
 ]);
