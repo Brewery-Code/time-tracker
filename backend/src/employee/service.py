@@ -305,7 +305,7 @@ class EmployeeService:
         await session.commit()
         return {"message": "Work session ended", "worked_for": str(duration)}
 
-
+    @staticmethod
     async def add_workplace(data: WorkplaceCreateSchema, session: SessionDep, token: str):
         """
         Add a new workplace.
