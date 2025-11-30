@@ -1,10 +1,16 @@
+import { ROUTES } from "@shared/model/routes";
+import { Link } from "react-router-dom";
+
 export function Header() {
   return (
     <header className="bg-white dark:bg-gray-800 shadow-md py-4 sticky top-0 z-10">
       <div className="container-base mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+        <Link
+          className="text-2xl font-bold text-indigo-600 dark:text-indigo-400"
+          to={ROUTES.HOME}
+        >
           TimeTracker
-        </h1>
+        </Link>
         <nav>
           <a
             href="#"

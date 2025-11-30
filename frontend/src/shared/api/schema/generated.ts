@@ -174,26 +174,39 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/employees/workplaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Workplace
+         * @description Add a new workplace.
+         */
+        post: operations["add_workplace_employees_workplaces_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /**
-         * EmployeeCreateSchema
-         * @description Schema using for employee creation
-         */
-        EmployeeCreateSchema: {
-            /** Full Name */
-            full_name: string;
+        /** Body_create_employee_employees_post */
+        Body_create_employee_employees_post: {
             /**
-             * Email
-             * Format: email
+             * File
+             * Format: binary
              */
-            email: string;
-            /** Phone Number */
-            phone_number: string;
-            /** Workplace Id */
-            workplace_id: number;
+            file: string;
+            /** Data */
+            data: string;
         };
         /**
          * EmployeeReturnDetailSchema
@@ -202,8 +215,14 @@ export interface components {
         EmployeeReturnDetailSchema: {
             /** Id */
             id: number;
-            /** Full Name */
-            full_name: string;
+            /** First Name */
+            first_name: string;
+            /** Last Name */
+            last_name: string;
+            /** Position */
+            position: string;
+            /** Profile Photo */
+            profile_photo: string | null;
             /**
              * Email
              * Format: email
@@ -221,14 +240,20 @@ export interface components {
             personal_token: string;
         };
         /**
-         * EmployeeReturnSchema
-         * @description Schema using when returning employees information
+         * EmployeeWithStatsReturnSchema
+         * @description Schema using when returning employee information with work time
          */
-        EmployeeReturnSchema: {
+        EmployeeWithStatsReturnSchema: {
             /** Id */
             id: number;
-            /** Full Name */
-            full_name: string;
+            /** First Name */
+            first_name: string;
+            /** Last Name */
+            last_name: string;
+            /** Position */
+            position: string;
+            /** Profile Photo */
+            profile_photo: string | null;
             /**
              * Email
              * Format: email
@@ -242,6 +267,7 @@ export interface components {
              */
             created_at: string;
             workplace: components["schemas"]["WorkPlaceReturnSchema"];
+            work_stats: components["schemas"]["WorkTimeStatusSchema"];
         };
         /**
          * EmployeeWorkDetailSchema
@@ -338,7 +364,8 @@ export interface components {
         };
         /**
          * WorkSummarySchema
-         * @description Schema using when returning work summary
+         * @description Повертає статистику за день.
+         *     hours - це об'єкт time (наприклад 08:45:00) або None.
          */
         WorkSummarySchema: {
             /**
@@ -346,8 +373,30 @@ export interface components {
              * Format: date
              */
             date: string;
-            /** Hours */
-            hours: number;
+            /** Work Time */
+            work_time: string | null;
+        };
+        /**
+         * WorkTimeStatusSchema
+         * @description Schema using when returning work time status
+         */
+        WorkTimeStatusSchema: {
+            /** Today */
+            today: string | null;
+            /** Week */
+            week: string | null;
+            /** Month */
+            month: string | null;
+        };
+        /**
+         * WorkplaceCreateSchema
+         * @description Schema using when creating work place
+         */
+        WorkplaceCreateSchema: {
+            /** Title */
+            title: string;
+            /** Address */
+            address: string;
         };
     };
     responses: never;
@@ -499,7 +548,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EmployeeReturnSchema"][];
+                    "application/json": components["schemas"]["EmployeeWithStatsReturnSchema"][];
                 };
             };
         };
@@ -513,7 +562,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EmployeeCreateSchema"];
+                "multipart/form-data": components["schemas"]["Body_create_employee_employees_post"];
             };
         };
         responses: {
@@ -540,8 +589,8 @@ export interface operations {
     get_employee_detail_employees__employee_id__get: {
         parameters: {
             query?: {
-                month?: number | null;
-                year?: number | null;
+                week?: string | null;
+                month?: string | null;
             };
             header?: never;
             path: {
@@ -607,6 +656,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    add_workplace_employees_workplaces_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkplaceCreateSchema"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -1,4 +1,6 @@
+import { rqClient } from "@shared/api/instance";
 import React, { useState, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import {
   BarChart,
   Bar,
@@ -11,64 +13,121 @@ import {
 } from "recharts";
 
 // --- TYPES ---
-interface TimeData {
-  hours: number;
-  minutes: number;
+interface WorkPlace {
+  id: number;
+  title: string;
+  address: string;
 }
-
-interface WorkLog {
-  date: string; // YYYY-MM-DD
-  time: TimeData;
+interface Employee {
+  id: number;
+  first_name: string;
+  last_name: string;
+  position: string;
+  profile_photo: string;
+  email: string;
+  phone_number: string;
+  created_at: string;
+  workplace: WorkPlace;
+  personal_token: string;
 }
-
-interface Worker {
-  id: string;
-  firstName: string;
-  lastName: "Kovalenko";
-  avatarUrl: string;
-  workLogs: WorkLog[];
+interface WorkSummary {
+  date: string;
+  work_time: string;
 }
-
+interface EmployeeWorkDetailResponse {
+  employee: Employee;
+  period: string;
+  work_summary: WorkSummary[];
+  total_hours: number;
+}
 interface ChartData {
   name: string;
   hours: number;
+  fullDate: string;
 }
+
+// --- HELPERS ---
+
+// Надійний парсинг часу
+const parseWorkTime = (workTime: string | number): number => {
+  if (typeof workTime === "number") return workTime;
+  if (!workTime) return 0;
+
+  // Варіант 1: Якщо приходить просто час "08:30:00"
+  if (workTime.includes(":") && !workTime.includes("T")) {
+    const [h, m] = workTime.split(":").map(Number);
+    return parseFloat((h + m / 60).toFixed(2));
+  }
+
+  // Варіант 2: Якщо приходить ISO Date
+  const date = new Date(workTime);
+  if (!isNaN(date.getTime())) {
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    return parseFloat((hours + minutes / 60).toFixed(2));
+  }
+
+  return 0;
+};
+
+// YYYY-MM-DD (Локальний час)
+const formatDateISO = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+// Понеділок поточного тижня
+const getMonday = (d: Date): Date => {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  date.setDate(diff);
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
+
+// Перше число місяця
+const getFirstDayOfMonth = (d: Date): Date => {
+  const date = new Date(d);
+  date.setDate(1);
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
 
 // --- COMPONENTS ---
 
-// From components/WorkHoursChart.tsx
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="p-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md shadow-lg">
-        <p className="font-bold text-slate-800 dark:text-slate-100">{`${label}`}</p>
-        <p className="text-indigo-600 dark:text-indigo-400">{`Години : ${payload[0].value.toFixed(
-          2,
-        )}`}</p>
+        <p className="font-bold text-slate-800 dark:text-slate-100">
+          {payload[0].payload.fullDate}
+        </p>
+        <p className="text-indigo-600 dark:text-indigo-400">{`Години: ${payload[0].value}`}</p>
       </div>
     );
   }
-
   return null;
 };
 
-interface WorkHoursChartProps {
-  data: ChartData[];
-}
+const WorkHoursChart: React.FC<{ data: ChartData[] }> = ({ data }) => {
+  const interval = data.length > 15 ? Math.floor(data.length / 10) : 0;
 
-const WorkHoursChart: React.FC<WorkHoursChartProps> = ({ data }) => {
-  const interval = data.length > 12 ? Math.floor(data.length / 10) : 0;
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center text-gray-400">
+        Немає даних
+      </div>
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart
         data={data}
-        margin={{
-          top: 30,
-          right: 0,
-          left: 0,
-          bottom: 5,
-        }}
+        margin={{ top: 30, right: 0, left: 0, bottom: 5 }}
         barGap={4}
       >
         <CartesianGrid
@@ -81,33 +140,32 @@ const WorkHoursChart: React.FC<WorkHoursChartProps> = ({ data }) => {
           tickLine={false}
           axisLine={false}
           tick={{ fill: "#64748b" }}
-          className="text-xs dark:fill-slate-400"
+          className="text-xs"
           interval={interval}
         />
         <YAxis
           axisLine={false}
           tickLine={false}
           tick={{ fill: "#64748b" }}
-          className="text-xs dark:fill-slate-400"
-          label={{
-            value: "Години",
-            angle: -90,
-            position: "insideLeft",
-            fill: "#64748b",
-            className: "dark:fill-slate-400",
-          }}
+          className="text-xs"
         />
         <Tooltip
           content={<CustomTooltip />}
           cursor={{ fill: "rgba(129, 140, 248, 0.1)" }}
         />
-        <Bar dataKey="hours" fill="#818cf8" radius={[4, 4, 0, 0]}>
+        {/* minPointSize дозволяє бачити навіть дуже малі значення */}
+        <Bar
+          dataKey="hours"
+          fill="#818cf8"
+          radius={[4, 4, 0, 0]}
+          minPointSize={2}
+        >
           <LabelList
             dataKey="hours"
             position="top"
             offset={8}
             className="fill-slate-700 dark:fill-slate-200 text-xs"
-            formatter={(value: number) => (value > 0 ? value.toFixed(2) : "")}
+            formatter={(v: number) => (v > 0 ? v.toFixed(1) : "")}
           />
         </Bar>
       </BarChart>
@@ -115,121 +173,85 @@ const WorkHoursChart: React.FC<WorkHoursChartProps> = ({ data }) => {
   );
 };
 
-// From components/WorkerInfo.tsx
-interface WorkerInfoProps {
-  worker: Omit<Worker, "workLogs">;
-  stats: {
-    timeToday: TimeData;
-    timeWeek: TimeData;
-    timeMonth: TimeData;
-  };
-}
-
-const StatCard: React.FC<{ title: string; time: TimeData }> = ({
-  title,
-  time,
-}) => {
-  const timeString = `${time.hours}г ${time.minutes}хв`;
-  return (
-    <div>
+const WorkerInfo: React.FC<{ employee: Employee; totalHours: number }> = ({
+  employee,
+  totalHours,
+}) => (
+  <>
+    <div className="flex flex-col sm:flex-row items-center text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-6">
+      <div className="w-24 h-24 rounded-full border-4 border-indigo-500 shadow-lg bg-gray-200 flex items-center justify-center overflow-hidden">
+        {employee.profile_photo ? (
+          <img
+            src={employee.profile_photo}
+            alt="Avatar"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="text-2xl font-bold text-gray-500">
+            {employee.first_name[0]}
+          </span>
+        )}
+      </div>
+      <div>
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+          {employee.first_name} {employee.last_name}
+        </h1>
+        <p className="text-indigo-500 dark:text-indigo-400 font-medium mt-1">
+          {employee.position}
+        </p>
+        <p className="text-sm text-gray-500">{employee.email}</p>
+      </div>
+    </div>
+    <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 text-center">
       <p className="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-        {title}
+        Всього годин за період
       </p>
       <p className="text-xl font-semibold text-slate-700 dark:text-slate-200 mt-1">
-        {timeString}
+        {totalHours.toFixed(2)} год
       </p>
     </div>
-  );
-};
+  </>
+);
 
-const WorkerInfo: React.FC<WorkerInfoProps> = ({ worker, stats }) => {
-  return (
-    <>
-      <div className="flex flex-col sm:flex-row items-center text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-6">
-        <img
-          src={worker.avatarUrl}
-          alt={`${worker.firstName} ${worker.lastName}`}
-          className="w-24 h-24 rounded-full border-4 border-indigo-500 shadow-lg"
-        />
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-            {worker.firstName} {worker.lastName}
-          </h1>
-          <p className="text-indigo-500 dark:text-indigo-400 font-medium mt-1">
-            Статистика Робочого Часу
-          </p>
-        </div>
-      </div>
-      <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-        <StatCard title="Сьогодні" time={stats.timeToday} />
-        <StatCard title="Цей тиждень" time={stats.timeWeek} />
-        <StatCard title="Цей місяць" time={stats.timeMonth} />
-      </div>
-    </>
-  );
-};
-
-// --- MAIN APP LOGIC ---
-
-const initialWorkerData: Worker = {
-  id: "1",
-  firstName: "Olena",
-  lastName: "Kovalenko",
-  avatarUrl: "https://picsum.photos/seed/user1/200",
-  workLogs: [
-    { date: "2025-10-19", time: { hours: 0, minutes: 0 } },
-    { date: "2025-10-20", time: { hours: 7, minutes: 45 } },
-    { date: "2025-10-21", time: { hours: 8, minutes: 10 } },
-    { date: "2025-10-22", time: { hours: 7, minutes: 30 } },
-    { date: "2025-10-23", time: { hours: 8, minutes: 55 } },
-    { date: "2025-10-24", time: { hours: 7, minutes: 45 } },
-    { date: "2025-10-25", time: { hours: 0, minutes: 0 } },
-    { date: "2025-10-26", time: { hours: 0, minutes: 0 } },
-    { date: "2025-10-27", time: { hours: 8, minutes: 10 } },
-    { date: "2025-10-28", time: { hours: 7, minutes: 30 } },
-    { date: "2025-10-29", time: { hours: 8, minutes: 55 } },
-    { date: "2025-10-30", time: { hours: 7, minutes: 45 } },
-    { date: "2025-10-31", time: { hours: 8, minutes: 10 } },
-    { date: "2025-11-01", time: { hours: 0, minutes: 0 } },
-    { date: "2025-11-02", time: { hours: 0, minutes: 0 } },
-    { date: "2025-11-03", time: { hours: 7, minutes: 30 } },
-    { date: "2025-11-04", time: { hours: 8, minutes: 55 } },
-    { date: "2025-11-05", time: { hours: 7, minutes: 45 } },
-    { date: "2025-11-06", time: { hours: 8, minutes: 10 } },
-    { date: "2025-11-07", time: { hours: 7, minutes: 30 } },
-    { date: "2025-11-08", time: { hours: 0, minutes: 0 } },
-    { date: "2025-11-09", time: { hours: 0, minutes: 0 } },
-    { date: "2025-11-10", time: { hours: 8, minutes: 55 } },
-    { date: "2025-11-11", time: { hours: 7, minutes: 45 } },
-    { date: "2025-11-12", time: { hours: 8, minutes: 10 } },
-    { date: "2025-11-13", time: { hours: 7, minutes: 30 } },
-    { date: "2025-11-14", time: { hours: 8, minutes: 55 } },
-    { date: "2025-11-15", time: { hours: 0, minutes: 0 } },
-    { date: "2025-11-16", time: { hours: 0, minutes: 0 } },
-    { date: "2025-11-17", time: { hours: 7, minutes: 45 } },
-  ],
-};
+// --- MAIN COMPONENT ---
 
 type TimePeriod = "week" | "month";
 
-const User: React.FC = () => {
-  const [worker] = useState<Worker>(initialWorkerData);
+function User() {
+  const { userId } = useParams<{ userId: string }>();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("week");
-  const [currentDate, setCurrentDate] = useState(
-    new Date("2025-11-17T12:00:00Z"),
+  const [currentDate, setCurrentDate] = useState(() => getMonday(new Date()));
+
+  // API QUERY
+  const {
+    data: apiData,
+    isLoading,
+    isError,
+  } = rqClient.useQuery(
+    "get",
+    "/employees/{employee_id}",
+    {
+      params: {
+        path: { employee_id: Number(userId) },
+        query: {
+          // Відправляємо YYYY-MM-DD і для тижня, і для місяця (щоб пройти валідацію на бекенді)
+          week: timePeriod === "week" ? formatDateISO(currentDate) : undefined,
+          month:
+            timePeriod === "month" ? formatDateISO(currentDate) : undefined,
+        },
+      },
+    },
+    { enabled: !isNaN(Number(userId)) },
   );
 
-  const convertToDecimalHours = (time: TimeData): number => {
-    return parseFloat((time.hours + time.minutes / 60).toFixed(2));
-  };
-
+  // HANDLERS (Всі всередині компонента!)
   const handlePrev = () => {
-    setCurrentDate((prevDate) => {
-      const newDate = new Date(prevDate);
+    setCurrentDate((prev) => {
+      const newDate = new Date(prev);
       if (timePeriod === "week") {
         newDate.setDate(newDate.getDate() - 7);
       } else {
-        newDate.setDate(1); // Avoid issues with different month lengths
+        newDate.setDate(1);
         newDate.setMonth(newDate.getMonth() - 1);
       }
       return newDate;
@@ -237,224 +259,189 @@ const User: React.FC = () => {
   };
 
   const handleNext = () => {
-    setCurrentDate((prevDate) => {
-      const newDate = new Date(prevDate);
+    setCurrentDate((prev) => {
+      const newDate = new Date(prev);
       if (timePeriod === "week") {
         newDate.setDate(newDate.getDate() + 7);
       } else {
-        newDate.setDate(1); // Avoid issues with different month lengths
+        newDate.setDate(1);
         newDate.setMonth(newDate.getMonth() + 1);
       }
       return newDate;
     });
   };
 
-  const isNextDisabled = useMemo(() => {
-    // To make this dynamic, replace the fixed date string with `new Date()`
-    const today = new Date("2025-11-17T23:59:59Z");
-    const calendarDate = new Date(currentDate);
+  const handleModeChange = (mode: TimePeriod) => {
+    setTimePeriod(mode);
+    const now = new Date();
+    setCurrentDate(mode === "week" ? getMonday(now) : getFirstDayOfMonth(now));
+  };
+
+  // CHART DATA MEMO
+  const chartData: ChartData[] = useMemo(() => {
+    if (!apiData?.work_summary) return [];
+
+    // Debug в консоль
+    console.log("API RAW:", apiData.work_summary);
+
+    const summaryMap = new Map();
+    apiData.work_summary.forEach((item) => {
+      // Нормалізуємо дату з API, щоб вона точно збігалася з ключами
+      const normalizedDate = formatDateISO(new Date(item.date));
+      const hours = parseWorkTime(item.work_time);
+      summaryMap.set(normalizedDate, hours);
+    });
+
+    const data: ChartData[] = [];
 
     if (timePeriod === "week") {
-      const dayOfWeek =
-        calendarDate.getDay() === 0 ? 6 : calendarDate.getDay() - 1;
-      const endOfWeek = new Date(calendarDate);
-      endOfWeek.setDate(calendarDate.getDate() - dayOfWeek + 6);
-      return endOfWeek >= today;
-    } else {
-      // month
-      return (
-        calendarDate.getFullYear() === today.getFullYear() &&
-        calendarDate.getMonth() === today.getMonth()
-      );
-    }
-  }, [currentDate, timePeriod]);
-
-  const displayedChartData = useMemo(() => {
-    const referenceDate = new Date(currentDate);
-    // To make this dynamic, replace the fixed date string with `new Date()`
-    const today = new Date("2025-11-17T23:59:59Z");
-    today.setHours(23, 59, 59, 999);
-
-    const workLogsByDate = new Map(
-      worker.workLogs.map((log) => [log.date, log.time]),
-    );
-
-    if (timePeriod === "week") {
-      const dayOfWeek = referenceDate.getDay();
-      const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      const startOfWeek = new Date(referenceDate);
-      startOfWeek.setDate(referenceDate.getDate() - offset);
-
+      const startDate = new Date(currentDate);
       const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
-      const weekData = [];
-
       for (let i = 0; i < 7; i++) {
-        const date = new Date(startOfWeek);
-        date.setDate(startOfWeek.getDate() + i);
+        const current = new Date(startDate);
+        current.setDate(startDate.getDate() + i);
+        const dateStr = formatDateISO(current);
 
-        if (date > today) break;
-
-        const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
-        const dateString = date.toISOString().split("T")[0];
-        const logTime = workLogsByDate.get(dateString);
-
-        weekData.push({
-          name: dayNames[dayIndex],
-          hours: logTime ? convertToDecimalHours(logTime) : 0,
+        data.push({
+          name: dayNames[i],
+          fullDate: dateStr,
+          hours: summaryMap.get(dateStr) || 0,
         });
       }
-      return weekData;
+    } else {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const m = String(month + 1).padStart(2, "0");
+        const d = String(i).padStart(2, "0");
+        const dateStr = `${year}-${m}-${d}`;
+
+        data.push({
+          name: i.toString(),
+          fullDate: dateStr,
+          hours: summaryMap.get(dateStr) || 0,
+        });
+      }
     }
 
-    // Month view
-    const daysInMonth = new Date(
-      referenceDate.getFullYear(),
-      referenceDate.getMonth() + 1,
-      0,
-    ).getDate();
-    const isCurrentMonth =
-      referenceDate.getFullYear() === today.getFullYear() &&
-      referenceDate.getMonth() === today.getMonth();
-    const limit = isCurrentMonth ? today.getDate() : daysInMonth;
-    const monthData = [];
+    console.log("Chart Processed:", data);
+    return data;
+  }, [apiData, timePeriod, currentDate]);
 
-    for (let day = 1; day <= limit; day++) {
-      const date = new Date(
-        referenceDate.getFullYear(),
-        referenceDate.getMonth(),
-        day,
-      );
-      const dateString = date.toISOString().split("T")[0];
-      const logTime = workLogsByDate.get(dateString);
-
-      monthData.push({
-        name: day.toString(),
-        hours: logTime ? convertToDecimalHours(logTime) : 0,
-      });
-    }
-    return monthData;
-  }, [worker.workLogs, timePeriod, currentDate]);
-
+  // PERIOD DISPLAY MEMO
   const periodDisplay = useMemo(() => {
+    const locale = "uk-UA";
     if (timePeriod === "month") {
-      const monthName = currentDate.toLocaleDateString("uk-UA", {
-        month: "long",
-        year: "numeric",
-      });
-      return monthName.charAt(0).toUpperCase() + monthName.slice(1);
+      return currentDate
+        .toLocaleDateString(locale, { month: "long", year: "numeric" })
+        .toUpperCase();
     }
-
-    // Week view
-    const dayOfWeek = currentDate.getDay();
-    const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const startOfWeek = new Date(currentDate);
-    startOfWeek.setDate(currentDate.getDate() - offset);
-
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-    const startDay = startOfWeek.getDate();
-    const endDay = endOfWeek.getDate();
-    const startMonth = startOfWeek.toLocaleDateString("uk-UA", {
+    const start = new Date(currentDate);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const startF = start.toLocaleDateString(locale, {
+      day: "numeric",
       month: "long",
     });
-    const endMonth = endOfWeek.toLocaleDateString("uk-UA", { month: "long" });
-
-    if (startMonth === endMonth) {
-      return `${startDay} - ${endDay} ${startMonth}`;
-    } else {
-      return `${startDay} ${startMonth} - ${endDay} ${endMonth}`;
-    }
+    const endF = end.toLocaleDateString(locale, {
+      day: "numeric",
+      month: "long",
+    });
+    return `${startF} - ${endF}`;
   }, [currentDate, timePeriod]);
 
-  const stats = {
-    timeToday: { hours: 7, minutes: 45 },
-    timeWeek: { hours: 38, minutes: 20 },
-    timeMonth: { hours: 165, minutes: 10 },
-  };
-
-  const getToggleButtonClass = (period: TimePeriod) => {
-    const baseClasses =
-      "px-4 py-2 text-sm font-medium transition-colors duration-200 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500";
-    if (timePeriod === period) {
-      return `${baseClasses} bg-indigo-600 text-white shadow-sm`;
-    }
-    return `${baseClasses} bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600`;
-  };
+  // RENDER
+  if (isLoading) return <div className="p-10 text-center">Завантаження...</div>;
+  if (isError || !apiData)
+    return (
+      <div className="p-10 text-center text-red-500">
+        Помилка завантаження даних
+      </div>
+    );
 
   return (
     <div className="container-base min-h-screen flex items-center justify-center p-4 font-sans">
       <main className="w-full">
         <div className="bg-white dark:bg-slate-800 shadow-xl rounded-2xl overflow-hidden">
           <div className="p-6 md:p-8">
-            <WorkerInfo worker={worker} stats={stats} />
+            <WorkerInfo
+              employee={apiData.employee}
+              totalHours={apiData.total_hours}
+            />
 
             <div className="mt-8">
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center mb-6 px-4 py-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
                 <button
                   onClick={handlePrev}
-                  className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
-                  aria-label="Попередній період"
+                  className="p-2 rounded-full hover:bg-white dark:hover:bg-slate-600 transition-all text-slate-500 dark:text-slate-300"
                 >
                   <svg
-                    className="w-6 h-6 text-slate-500 dark:text-slate-400"
-                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
                     fill="none"
+                    viewBox="0 0 24 24"
                     stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    strokeWidth={2}
                   >
-                    <polyline points="15 18 9 12 15 6" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 19l-7-7 7-7"
+                    />
                   </svg>
                 </button>
-                <p className="text-lg font-semibold text-slate-700 dark:text-slate-200 text-center select-none">
+
+                <p className="text-lg font-bold text-slate-700 dark:text-slate-100 text-center select-none capitalize w-48">
                   {periodDisplay}
                 </p>
+
                 <button
                   onClick={handleNext}
-                  disabled={isNextDisabled}
-                  className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Наступний період"
+                  className="p-2 rounded-full hover:bg-white dark:hover:bg-slate-600 transition-all text-slate-500 dark:text-slate-300"
                 >
                   <svg
-                    className="w-6 h-6 text-slate-500 dark:text-slate-400"
-                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
                     fill="none"
+                    viewBox="0 0 24 24"
                     stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    strokeWidth={2}
                   >
-                    <polyline points="9 18 15 12 9 6" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </button>
               </div>
 
               <div className="flex justify-center items-center bg-slate-100 dark:bg-slate-900/50 p-1.5 rounded-lg space-x-2">
                 <button
-                  onClick={() => setTimePeriod("week")}
-                  className={getToggleButtonClass("week")}
+                  onClick={() => handleModeChange("week")}
+                  className={`px-6 py-2 text-sm font-medium rounded-md transition-all ${timePeriod === "week" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-300"}`}
                 >
                   Тиждень
                 </button>
                 <button
-                  onClick={() => setTimePeriod("month")}
-                  className={getToggleButtonClass("month")}
+                  onClick={() => handleModeChange("month")}
+                  className={`px-6 py-2 text-sm font-medium rounded-md transition-all ${timePeriod === "month" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-300"}`}
                 >
                   Місяць
                 </button>
               </div>
             </div>
 
-            <div className="mt-6 h-80 w-full">
-              <WorkHoursChart data={displayedChartData} />
+            <div className="mt-8 h-80 w-full">
+              <WorkHoursChart data={chartData} />
             </div>
           </div>
         </div>
       </main>
     </div>
   );
-};
+}
 
 export const Component = User;
