@@ -51,4 +51,4 @@ async def end_work(session: SessionDep, token: str = Depends(get_current_employe
 @router.post("/workplaces")
 async def add_workplace(data: WorkplaceCreateSchema, session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
     """Add a new workplace."""
-    return await EmployeeService.add_workplace(data, payload, session)
+    return await EmployeeService.add_workplace(data, session, payload)
