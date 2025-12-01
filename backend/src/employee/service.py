@@ -320,3 +320,43 @@ class EmployeeService:
         await session.commit()
         await session.refresh(new_workplace)
         return {"message": "Workplace added", "workplace_id": new_workplace.id}
+
+
+    @staticmethod
+    async def delete_employee_by_id(request: Request, employee_id: int, session: SessionDep, payload: TokenPayload):
+        """
+        Delete an employee.
+
+        Args:
+            request (Request): Request object.
+            employee_id (int): Employee id.
+            session (AsyncSession): Session object.
+            payload (Token): Validated payload:
+        """
+
+        user_id = extract_user_uid_from_token(payload)
+
+        if not user_id:
+            raise HTTPException(status_code=404, detail="User with this JWT token not found")
+
+        if not user_id:
+            raise HTTPException(status_code=404, detail="User with this JWT token not found")
+
+        query = select(Employee).where(
+            Employee.id == employee_id,
+            Employee.user_id == user_id
+        )
+
+        result = await session.execute(query)
+        employee = result.scalar_one_or_none()
+
+        if not employee:
+            raise HTTPException(
+                status_code=404,
+                detail="Employee not found or you don't have permission to delete it"
+            )
+
+        await session.delete(employee)
+        await session.commit()
+
+        return {"detail": "Employee deleted successfully"}

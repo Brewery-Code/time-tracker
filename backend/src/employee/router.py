@@ -52,3 +52,9 @@ async def end_work(session: SessionDep, token: str = Depends(get_current_employe
 async def add_workplace(data: WorkplaceCreateSchema, session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
     """Add a new workplace."""
     return await EmployeeService.add_workplace(data, session, payload)
+
+
+@router.delete("/{employee_id}", summary="Delete employee", openapi_extra={"security": [{"JWT Access Cookie": []}]})
+async def delete_employee(request: Request, employee_id: int, session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
+    """Delete an employee."""
+    return await EmployeeService.delete_employee_by_id(request, employee_id, session=session, payload=payload)
