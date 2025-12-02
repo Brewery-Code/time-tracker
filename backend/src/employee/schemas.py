@@ -159,3 +159,19 @@ class WorkplaceCreateSchema(BaseModel):
     """
     title: str
     address: str
+
+
+class EmployeeReturnByTokenSchema(EmployeeReturnDetailSchema):
+    day_time: timedelta | None
+    week_time: timedelta | None
+    month_time: timedelta | None
+
+    @field_serializer('day_time', 'week_time', 'month_time')
+    def serialize_duration(self, value: timedelta | None, _info):
+        if not value:
+            return "00:00"
+
+        total_seconds = int(value.total_seconds())
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        return f"{hours:02}:{minutes:02}"

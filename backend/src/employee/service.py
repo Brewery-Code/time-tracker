@@ -11,7 +11,8 @@ from sqlalchemy.orm import selectinload, Session
 
 from src.dependencies import SessionDep
 from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema, EmployeeWorkDetailSchema, \
-    EmployeeReturnDetailSchema, WorkSummarySchema, WorkplaceCreateSchema, EmployeeWithStatsReturnSchema
+    EmployeeReturnDetailSchema, WorkSummarySchema, WorkplaceCreateSchema, EmployeeWithStatsReturnSchema, \
+    EmployeeReturnByTokenSchema
 from src.employee.utils import generate_personal_token, hash_personal_token
 from src.utils.users import extract_user_uid_from_token, extract_user_by_id
 from src.users.models import User
@@ -360,3 +361,64 @@ class EmployeeService:
         await session.commit()
 
         return {"detail": "Employee deleted successfully"}
+
+    @staticmethod
+    async def get_employee_by_token(
+            request: Request,
+            token: str,
+            session: SessionDep
+    ) -> EmployeeReturnByTokenSchema:
+        """
+        Return employee by personal token with aggregated work stats.
+        """
+        query = (
+            select(Employee)
+            .where(Employee.personal_token == token)
+            .options(selectinload(Employee.workplace))
+        )
+        result = await session.execute(query)
+        employee = result.scalar_one_or_none()
+
+        if not employee:
+            raise HTTPException(status_code=404, detail="Employee not found")
+
+        today = date.today()
+
+        start_week = today - timedelta(days=today.weekday())
+        end_week = start_week + timedelta(days=6)
+        start_month = today.replace(day=1)
+        _, days_in_month = monthrange(today.year, today.month)
+        end_month = today.replace(day=days_in_month)
+
+        min_date = min(start_week, start_month)
+        max_date = max(end_week, end_month)
+
+        stmt = select(WorkDay).where(
+            WorkDay.employee_id == employee.id,
+            WorkDay.work_date.between(min_date, max_date)
+        )
+        result = await session.execute(stmt)
+        work_days = result.scalars().all()
+
+        day_sum = timedelta(0)
+        week_sum = timedelta(0)
+        month_sum = timedelta(0)
+
+        for wd in work_days:
+            if wd.work_date == today:
+                day_sum += wd.total_duration
+            if start_week <= wd.work_date <= end_week:
+                week_sum += wd.total_duration
+
+            if start_month <= wd.work_date <= end_month:
+                month_sum += wd.total_duration
+
+        employee_data = EmployeeReturnDetailSchema.model_validate(employee).model_dump(context={"request": request})
+
+        return EmployeeReturnByTokenSchema(
+            **employee_data,
+            day_time=day_sum,
+            week_time=week_sum,
+            month_time=month_sum
+        )
+

@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, Request
 from src.dependencies import SessionDep
 from src.employee.dependencies import get_current_employer_token
 from src.employee.schemas import EmployeeCreateSchema, EmployeeReturnSchema, EmployeeWorkDetailSchema, \
-    WorkplaceCreateSchema, EmployeeWithStatsReturnSchema
+    WorkplaceCreateSchema, EmployeeWithStatsReturnSchema, EmployeeReturnByTokenSchema
 from src.employee.service import EmployeeService
 from src.users.config import auth
 from src.security import *
@@ -58,3 +58,17 @@ async def add_workplace(data: WorkplaceCreateSchema, session: SessionDep, payloa
 async def delete_employee(request: Request, employee_id: int, session: SessionDep, payload: TokenPayload = Depends(auth.access_token_required)):
     """Delete an employee."""
     return await EmployeeService.delete_employee_by_id(request, employee_id, session=session, payload=payload)
+
+
+@router.get("/by-token/{employee_token}", response_model=EmployeeReturnByTokenSchema, summary="Return employee by personal token")
+async def get_employee_by_token(
+    request: Request,
+    employee_token: str,
+    session: SessionDep
+):
+    """Return employee info and stats by personal token."""
+    return await EmployeeService.get_employee_by_token(
+        request=request,
+        token=employee_token,
+        session=session
+    )
