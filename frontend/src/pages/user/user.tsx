@@ -23,23 +23,14 @@ interface Employee {
   first_name: string;
   last_name: string;
   position: string;
-  profile_photo: string;
+  profile_photo: string | null;
   email: string;
   phone_number: string;
   created_at: string;
   workplace: WorkPlace;
   personal_token: string;
 }
-interface WorkSummary {
-  date: string;
-  work_time: string;
-}
-interface EmployeeWorkDetailResponse {
-  employee: Employee;
-  period: string;
-  work_summary: WorkSummary[];
-  total_hours: number;
-}
+
 interface ChartData {
   name: string;
   hours: number;
@@ -165,7 +156,7 @@ const WorkHoursChart: React.FC<{ data: ChartData[] }> = ({ data }) => {
             position="top"
             offset={8}
             className="fill-slate-700 dark:fill-slate-200 text-xs"
-            formatter={(v: number) => (v > 0 ? v.toFixed(1) : "")}
+            formatter={(v: any) => (v > 0 ? v.toFixed(1) : "")}
           />
         </Bar>
       </BarChart>
@@ -176,42 +167,104 @@ const WorkHoursChart: React.FC<{ data: ChartData[] }> = ({ data }) => {
 const WorkerInfo: React.FC<{ employee: Employee; totalHours: number }> = ({
   employee,
   totalHours,
-}) => (
-  <>
-    <div className="flex flex-col sm:flex-row items-center text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-6">
-      <div className="w-24 h-24 rounded-full border-4 border-indigo-500 shadow-lg bg-gray-200 flex items-center justify-center overflow-hidden">
-        {employee.profile_photo ? (
-          <img
-            src={employee.profile_photo}
-            alt="Avatar"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span className="text-2xl font-bold text-gray-500">
-            {employee.first_name[0]}
-          </span>
-        )}
+}) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyToken = () => {
+    if (employee.personal_token) {
+      navigator.clipboard.writeText(employee.personal_token);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex flex-col sm:flex-row items-center text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-6">
+        <div className="w-24 h-24 rounded-full border-4 border-indigo-500 shadow-lg bg-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+          {employee.profile_photo ? (
+            <img
+              src={employee.profile_photo}
+              alt="Avatar"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-2xl font-bold text-gray-500">
+              {employee.first_name[0]}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col items-center sm:items-start overflow-hidden w-full">
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 truncate w-full">
+            {employee.first_name} {employee.last_name}
+          </h1>
+          <p className="text-indigo-500 dark:text-indigo-400 font-medium mt-1">
+            {employee.position}
+          </p>
+          <p className="text-sm text-gray-500">{employee.email}</p>
+
+          {/* --- БЛОК ТОКЕНА --- */}
+          {employee.personal_token && (
+            <div className="mt-3 flex items-center space-x-2 max-w-full">
+              <div
+                className="bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 px-3 py-1.5 rounded-md text-xs font-mono text-slate-600 dark:text-slate-300 truncate select-all cursor-pointer hover:border-indigo-300 transition-colors"
+                onClick={handleCopyToken}
+                title="Натисніть, щоб скопіювати"
+                style={{ maxWidth: "200px" }}
+              >
+                {employee.personal_token}
+              </div>
+              <button
+                onClick={handleCopyToken}
+                className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all"
+                title="Скопіювати токен"
+              >
+                {copied ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-green-500"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
+          )}
+          {/* --- КІНЕЦЬ БЛОКУ ТОКЕНА --- */}
+        </div>
       </div>
-      <div>
-        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-          {employee.first_name} {employee.last_name}
-        </h1>
-        <p className="text-indigo-500 dark:text-indigo-400 font-medium mt-1">
-          {employee.position}
+      <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 text-center">
+        <p className="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          Всього годин за період
         </p>
-        <p className="text-sm text-gray-500">{employee.email}</p>
+        <p className="text-xl font-semibold text-slate-700 dark:text-slate-200 mt-1">
+          {totalHours.toFixed(2)} год
+        </p>
       </div>
-    </div>
-    <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 text-center">
-      <p className="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-        Всього годин за період
-      </p>
-      <p className="text-xl font-semibold text-slate-700 dark:text-slate-200 mt-1">
-        {totalHours.toFixed(2)} год
-      </p>
-    </div>
-  </>
-);
+    </>
+  );
+};
 
 // --- MAIN COMPONENT ---
 
@@ -288,7 +341,7 @@ function User() {
     apiData.work_summary.forEach((item) => {
       // Нормалізуємо дату з API, щоб вона точно збігалася з ключами
       const normalizedDate = formatDateISO(new Date(item.date));
-      const hours = parseWorkTime(item.work_time);
+      const hours = parseWorkTime(item.work_time!);
       summaryMap.set(normalizedDate, hours);
     });
 

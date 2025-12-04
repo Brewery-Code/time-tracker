@@ -1,12 +1,14 @@
+---
 openapi: 3.1.0
 info:
-  title: FastAPI
-  version: 0.1.0
+  title: WorkTime API
+  description: API for managing employees and work sessions
+  version: 1.0.0
 paths:
-  /users/register:
+  "/users/register":
     post:
       tags:
-      - users
+        - users
       summary: Create a new user
       description: Create a new user.
       operationId: create_user_users_register_post
@@ -14,24 +16,24 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCreateSchema'
+              "$ref": "#/components/schemas/UserCreateSchema"
         required: true
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema: {}
-        '422':
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /users/login:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/users/login":
     post:
       tags:
-      - users
+        - users
       summary: Login a user
       description: Login a user.
       operationId: login_user_users_login_post
@@ -39,221 +41,250 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserLoginSchema'
+              "$ref": "#/components/schemas/UserLoginSchema"
         required: true
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema: {}
-        '422':
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /users/token-refresh:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/users/token-refresh":
     post:
       tags:
-      - users
+        - users
       summary: Token Refresh
-      description: 'Return Updated JWT tokens in cookies.
+      description: |-
+        Return Updated JWT tokens in cookies.
 
-
-        Requires refresh token cookie.'
+        Requires refresh token cookie.
       operationId: token_refresh_users_token_refresh_post
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema: {}
       security:
-      - JWT Refresh Cookie: []
-  /users/me:
+        - JWT Refresh Cookie: []
+  "/users/me":
     get:
       tags:
-      - users
+        - users
       summary: Get current user's info
       description: Get current user's info.
       operationId: get_current_user_users_me_get
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserCurrentSchema'
+                "$ref": "#/components/schemas/UserCurrentSchema"
       security:
-      - JWT Access Cookie: []
+        - JWT Access Cookie: []
     delete:
       tags:
-      - users
+        - users
       summary: Deactivate a user's profile
       description: Deactivate a user's profile.
       operationId: deactivate_user_users_me_delete
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema: {}
       security:
-      - JWT Access Cookie: []
-  /employees:
+        - JWT Access Cookie: []
+  "/employees":
     get:
       tags:
-      - employees
+        - employees
       summary: Get all employees for current user
       description: Get all employees for current user.
       operationId: get_all_employees_employees_get
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/EmployeeReturnSchema'
+                  "$ref": "#/components/schemas/EmployeeWithStatsReturnSchema"
                 type: array
                 title: Response Get All Employees Employees Get
       security:
-      - JWT Access Cookie: []
+        - JWT Access Cookie: []
     post:
       tags:
-      - employees
+        - employees
       summary: Create a new employee
       description: Create a new employee.
       operationId: create_employee_employees_post
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/EmployeeCreateSchema'
+              "$ref": "#/components/schemas/Body_create_employee_employees_post"
         required: true
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema: {}
-        '422':
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                "$ref": "#/components/schemas/HTTPValidationError"
       security:
-      - JWT Access Cookie: []
-  /employees/{employee_id}:
+        - JWT Access Cookie: []
+  "/employees/{employee_id}":
     get:
       tags:
-      - employees
+        - employees
       summary: Get a specific employee
       description: Get detailed info and work summary for an employee
       operationId: get_employee_detail_employees__employee_id__get
       parameters:
-      - name: employee_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Employee Id
-      - name: month
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Month
-      - name: year
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Year
+        - name: employee_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Employee Id
+        - name: week
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+                format: date
+              - type: "null"
+            title: Week
+        - name: month
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+                format: date
+              - type: "null"
+            title: Month
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmployeeWorkDetailSchema'
-        '422':
+                "$ref": "#/components/schemas/EmployeeWorkDetailSchema"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                "$ref": "#/components/schemas/HTTPValidationError"
       security:
-      - JWT Access Cookie: []
-  /employees/work/start:
+        - JWT Access Cookie: []
+  "/employees/work/start":
     post:
       tags:
-      - employees
+        - employees
       summary: Start a new work session
       description: Start a new work session.
       operationId: start_work_employees_work_start_post
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema: {}
       security:
-      - Employer Header Token: []
-  /employees/work/end:
+        - Employer Header Token: []
+  "/employees/work/end":
     post:
       tags:
-      - employees
+        - employees
       summary: End a new work session
       description: End a new work session.
       operationId: end_work_employees_work_end_post
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema: {}
       security:
-      - Employer Header Token: []
+        - Employer Header Token: []
+  "/employees/workplaces":
+    post:
+      tags:
+        - employees
+      summary: Add Workplace
+      description: Add a new workplace.
+      operationId: add_workplace_employees_workplaces_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/WorkplaceCreateSchema"
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
 components:
   schemas:
-    EmployeeCreateSchema:
+    Body_create_employee_employees_post:
       properties:
-        full_name:
+        file:
           type: string
-          title: Full Name
-        email:
+          format: binary
+          title: File
+        data:
           type: string
-          format: email
-          title: Email
-        phone_number:
-          type: string
-          title: Phone Number
-        workplace_id:
-          type: integer
-          title: Workplace Id
+          title: Data
       type: object
       required:
-      - full_name
-      - email
-      - phone_number
-      - workplace_id
-      title: EmployeeCreateSchema
-      description: Schema using for employee creation
+        - file
+        - data
+      title: Body_create_employee_employees_post
     EmployeeReturnDetailSchema:
       properties:
         id:
           type: integer
           title: Id
-        full_name:
+        first_name:
           type: string
-          title: Full Name
+          title: First Name
+        last_name:
+          type: string
+          title: Last Name
+        position:
+          type: string
+          title: Position
+        profile_photo:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Profile Photo
         email:
           type: string
           format: email
@@ -266,29 +297,43 @@ components:
           format: date-time
           title: Created At
         workplace:
-          $ref: '#/components/schemas/WorkPlaceReturnSchema'
+          "$ref": "#/components/schemas/WorkPlaceReturnSchema"
         personal_token:
           type: string
           title: Personal Token
       type: object
       required:
-      - id
-      - full_name
-      - email
-      - phone_number
-      - created_at
-      - workplace
-      - personal_token
+        - id
+        - first_name
+        - last_name
+        - position
+        - profile_photo
+        - email
+        - phone_number
+        - created_at
+        - workplace
+        - personal_token
       title: EmployeeReturnDetailSchema
       description: Schema using when returning employee detail information
-    EmployeeReturnSchema:
+    EmployeeWithStatsReturnSchema:
       properties:
         id:
           type: integer
           title: Id
-        full_name:
+        first_name:
           type: string
-          title: Full Name
+          title: First Name
+        last_name:
+          type: string
+          title: Last Name
+        position:
+          type: string
+          title: Position
+        profile_photo:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Profile Photo
         email:
           type: string
           format: email
@@ -301,27 +346,33 @@ components:
           format: date-time
           title: Created At
         workplace:
-          $ref: '#/components/schemas/WorkPlaceReturnSchema'
+          "$ref": "#/components/schemas/WorkPlaceReturnSchema"
+        work_stats:
+          "$ref": "#/components/schemas/WorkTimeStatusSchema"
       type: object
       required:
-      - id
-      - full_name
-      - email
-      - phone_number
-      - created_at
-      - workplace
-      title: EmployeeReturnSchema
-      description: Schema using when returning employees information
+        - id
+        - first_name
+        - last_name
+        - position
+        - profile_photo
+        - email
+        - phone_number
+        - created_at
+        - workplace
+        - work_stats
+      title: EmployeeWithStatsReturnSchema
+      description: Schema using when returning employee information with work time
     EmployeeWorkDetailSchema:
       properties:
         employee:
-          $ref: '#/components/schemas/EmployeeReturnDetailSchema'
+          "$ref": "#/components/schemas/EmployeeReturnDetailSchema"
         period:
           type: string
           title: Period
         work_summary:
           items:
-            $ref: '#/components/schemas/WorkSummarySchema'
+            "$ref": "#/components/schemas/WorkSummarySchema"
           type: array
           title: Work Summary
         total_hours:
@@ -329,17 +380,17 @@ components:
           title: Total Hours
       type: object
       required:
-      - employee
-      - period
-      - work_summary
-      - total_hours
+        - employee
+        - period
+        - work_summary
+        - total_hours
       title: EmployeeWorkDetailSchema
       description: Schema using when returning employee work detail information
     HTTPValidationError:
       properties:
         detail:
           items:
-            $ref: '#/components/schemas/ValidationError'
+            "$ref": "#/components/schemas/ValidationError"
           type: array
           title: Detail
       type: object
@@ -366,11 +417,11 @@ components:
           title: Password2
       type: object
       required:
-      - first_name
-      - last_name
-      - email
-      - password1
-      - password2
+        - first_name
+        - last_name
+        - email
+        - password1
+        - password2
       title: UserCreateSchema
       description: Schema used when creating a new user.
     UserCurrentSchema:
@@ -394,11 +445,11 @@ components:
           title: Created At
       type: object
       required:
-      - id
-      - first_name
-      - last_name
-      - email
-      - created_at
+        - id
+        - first_name
+        - last_name
+        - email
+        - created_at
       title: UserCurrentSchema
       description: Schema used for current user return.
     UserLoginSchema:
@@ -414,8 +465,8 @@ components:
           title: Password
       type: object
       required:
-      - email
-      - password
+        - email
+        - password
       title: UserLoginSchema
       description: Schema used when user trying to log-in
     ValidationError:
@@ -423,8 +474,8 @@ components:
         loc:
           items:
             anyOf:
-            - type: string
-            - type: integer
+              - type: string
+              - type: integer
           type: array
           title: Location
         msg:
@@ -435,9 +486,9 @@ components:
           title: Error Type
       type: object
       required:
-      - loc
-      - msg
-      - type
+        - loc
+        - msg
+        - type
       title: ValidationError
     WorkPlaceReturnSchema:
       properties:
@@ -452,9 +503,9 @@ components:
           title: Address
       type: object
       required:
-      - id
-      - title
-      - address
+        - id
+        - title
+        - address
       title: WorkPlaceReturnSchema
       description: Schema using when returning work place
     WorkSummarySchema:
@@ -463,12 +514,74 @@ components:
           type: string
           format: date
           title: Date
-        hours:
-          type: number
-          title: Hours
+        work_time:
+          anyOf:
+            - type: string
+              format: time
+            - type: "null"
+          title: Work Time
       type: object
       required:
-      - date
-      - hours
+        - date
+        - work_time
       title: WorkSummarySchema
-      description: Schema using when returning work summary
+      description: |-
+        Повертає статистику за день.
+        hours - це об'єкт time (наприклад 08:45:00) або None.
+    WorkTimeStatusSchema:
+      properties:
+        today:
+          anyOf:
+            - type: string
+              format: duration
+            - type: "null"
+          title: Today
+        week:
+          anyOf:
+            - type: string
+              format: duration
+            - type: "null"
+          title: Week
+        month:
+          anyOf:
+            - type: string
+              format: duration
+            - type: "null"
+          title: Month
+      type: object
+      required:
+        - today
+        - week
+        - month
+      title: WorkTimeStatusSchema
+      description: Schema using when returning work time status
+    WorkplaceCreateSchema:
+      properties:
+        title:
+          type: string
+          title: Title
+        address:
+          type: string
+          title: Address
+      type: object
+      required:
+        - title
+        - address
+      title: WorkplaceCreateSchema
+      description: Schema using when creating work place
+  securitySchemes:
+    JWT Access Cookie:
+      type: apiKey
+      in: cookie
+      name: access_token
+      description: Access token stored in HttpOnly cookie
+    JWT Refresh Cookie:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+      description: Refresh token stored in HttpOnly cookie
+    Employer Header Token:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: "Employer token. Format: `token <PERSONAL_TOKEN>`"

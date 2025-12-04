@@ -22,12 +22,9 @@ fetchClient.use({
     // Тимчасово ловимо 500, але ОБОВ'ЯЗКОВО виправте бекенд на 401
     if (response.status === 401 || response.status === 500) {
       // Робіть запит на рефреш
-      const { data, error } = await publicFetchClient.POST(
-        "/users/token-refresh",
-        {
-          credentials: "include",
-        },
-      );
+      const { error } = await publicFetchClient.POST("/users/token-refresh", {
+        credentials: "include",
+      });
 
       // Перевіряємо, чи успішний був саме РЕФРЕШ (error від publicClient), а не старий response
       if (!error) {
